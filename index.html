@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fragebogen</title>
+<style>
+body { font-family: Georgia, serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+h1 { text-align: center; }
+h2 { border-bottom: 2px solid #333; padding-bottom: 5px; margin-top: 2em; }
+.description { color: #555; font-style: italic; margin-bottom: 1.5em; }
+.question { margin-bottom: 1.5em; }
+.question label { display: block; font-weight: bold; margin-bottom: 5px; }
+.question input[type="text"], .question textarea { width: 100%; padding: 8px; font-size: 1em; border: 1px solid #999; border-radius: 3px; box-sizing: border-box; }
+.question textarea { height: 120px; resize: vertical; }
+.choice-group { display: flex; gap: 1.5em; flex-wrap: wrap; margin-top: 5px; }
+.choice-group label { font-weight: normal; display: flex; align-items: center; gap: 5px; }
+button { display: block; margin: 2em auto; padding: 12px 30px; font-size: 1.1em; background: #2a6; color: white; border: none; border-radius: 5px; cursor: pointer; }
+button:hover { background: #185; }
+.saved-notice { text-align: center; color: #2a6; opacity: 0; transition: opacity 0.3s; }
+</style>
+</head>
+<body>
+<h1 id="title"></h1>
+<div id="form"></div>
+<button onclick="exportPDF()">PDF exportieren</button>
+<p class="saved-notice" id="saved">✓ Gespeichert</p>
+
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.js"></script>
+<script>
+let data;
+const STORAGE_KEY = 'fragebogen_answers';
+
+async function init() {
+  const res = await fetch('questions.yaml');
+  data = jsyaml.load(await res.text());
+  document.getElementById('title').textContent = data.title;
+  const form = document.getElementById('form');
+  for (const section of data.sections) {
+    form.innerHTML += `<h2>${section.title}</h2>`;
+    if (section.description) form.innerHTML += `<p class="description">${section.description}</p>`;
+    for (const q of section.questions) {
+      form.innerHTML += renderQuestion(q);
+    }
+  }
+  loadAnswers();
+  form.addEventListener('input', saveAnswers);
+  // Allow deselecting radio buttons
+  form.addEventListener('click', e => {
+    if (e.target.type === 'radio' && e.target.dataset.wasChecked === 'true') {
+      e.target.checked = false;
+      e.target.dataset.wasChecked = 'false';
+      saveAnswers();
+    }
+  });
+  form.addEventListener('mousedown', e => {
+    if (e.target.type === 'radio') {
+      e.target.dataset.wasChecked = e.target.checked ? 'true' : 'false';
+    }
+  });
+}
+
+function renderQuestion(q) {
+  let input;
+  if (q.type === 'text') {
+    input = `<input type="text" id="${q.id}">`;
+  } else if (q.type === 'textarea') {
+    input = `<textarea id="${q.id}"></textarea>`;
+  } else if (q.type === 'yesno') {
+    input = `<div class="choice-group"><label><input type="radio" name="${q.id}" value="Ja"> Ja</label><label><input type="radio" name="${q.id}" value="Nein"> Nein</label></div>`;
+  } else if (q.type === 'choice') {
+    input = `<div class="choice-group">${q.options.map(o =>
+      `<label><input type="radio" name="${q.id}" value="${o}"> ${o}</label>`
+    ).join('')}</div>`;
+  }
+  return `<div class="question"><label for="${q.id}">${q.text}</label>${input}</div>`;
+}
+
+function saveAnswers() {
+  const answers = {};
+  for (const s of data.sections) for (const q of s.questions) {
+    if (q.type === 'choice' || q.type === 'yesno') {
+      const checked = document.querySelector(`input[name="${q.id}"]:checked`);
+      answers[q.id] = checked ? checked.value : '';
+    } else {
+      answers[q.id] = document.getElementById(q.id).value;
+    }
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+  const notice = document.getElementById('saved');
+  notice.style.opacity = 1;
+  setTimeout(() => notice.style.opacity = 0, 1500);
+}
+
+function loadAnswers() {
+  const answers = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  for (const [id, val] of Object.entries(answers)) {
+    const el = document.getElementById(id);
+    if (el) { el.value = val; }
+    else {
+      const radio = document.querySelector(`input[name="${id}"][value="${val}"]`);
+      if (radio) radio.checked = true;
+    }
+  }
+}
+
+function exportPDF() {
+  const answers = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  const content = [{ text: data.title, style: 'title' }];
+
+  function checkbox(checked) {
+    const box = {
+      canvas: [{ type: 'rect', x: 0, y: 0, w: 10, h: 10, lineWidth: 1, lineColor: '#333' }],
+      width: 14
+    };
+    if (checked) {
+      box.canvas.push({ type: 'line', x1: 2, y1: 5, x2: 4.5, y2: 8, lineWidth: 1.5, lineColor: '#333' });
+      box.canvas.push({ type: 'line', x1: 4.5, y1: 8, x2: 9, y2: 2, lineWidth: 1.5, lineColor: '#333' });
+    }
+    return box;
+  }
+
+  function optionRow(options, selected) {
+    const cols = [];
+    for (const o of options) {
+      cols.push(checkbox(o === selected));
+      cols.push({ text: o + '   ', style: 'answer', margin: [2, 0, 10, 0] });
+    }
+    return { columns: cols, margin: [10, 2, 0, 5] };
+  }
+
+  for (const section of data.sections) {
+    content.push({ text: section.title, style: 'h2', pageBreak: 'before' });
+    if (section.description) content.push({ text: section.description, style: 'desc' });
+    for (const q of section.questions) {
+      const questionBlock = [{ text: q.text, style: 'question' }];
+      if (q.type === 'yesno') {
+        questionBlock.push(optionRow(['Ja', 'Nein'], answers[q.id]));
+      } else if (q.type === 'choice') {
+        questionBlock.push(optionRow(q.options, answers[q.id]));
+      } else {
+        questionBlock.push({ text: answers[q.id] || '—', style: 'answer' });
+      }
+      content.push({ unbreakable: true, stack: questionBlock });
+    }
+  }
+  pdfMake.createPdf({
+    content,
+    styles: {
+      title: { fontSize: 18, bold: true, alignment: 'center', margin: [0, 0, 0, 20] },
+      h2: { fontSize: 14, bold: true, margin: [0, 20, 0, 5] },
+      desc: { fontSize: 10, italics: true, color: '#555', margin: [0, 0, 0, 10] },
+      question: { fontSize: 11, bold: true, margin: [0, 8, 0, 2] },
+      answer: { fontSize: 11, margin: [10, 0, 0, 5] }
+    }
+  }).download('fragebogen.pdf');
+}
+
+init();
+</script>
+</body>
+</html>

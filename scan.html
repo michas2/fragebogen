@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buchseiten → YAML (lokal)</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+h1 { text-align: center; }
+.drop-zone { border: 3px dashed #999; border-radius: 10px; padding: 40px; text-align: center; color: #666; cursor: pointer; margin: 20px 0; }
+.drop-zone.dragover { border-color: #2a6; background: #f0fff5; }
+.previews { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+.previews img { height: 120px; border-radius: 5px; border: 1px solid #ccc; }
+button { display: block; margin: 20px auto; padding: 12px 30px; font-size: 1.1em; background: #2a6; color: white; border: none; border-radius: 5px; cursor: pointer; }
+button:hover { background: #185; }
+button:disabled { background: #999; cursor: not-allowed; }
+.tabs { display: flex; gap: 0; margin-top: 20px; }
+.tabs button { margin: 0; border-radius: 5px 5px 0 0; background: #ddd; color: #333; font-size: 0.9em; padding: 8px 20px; }
+.tabs button.active { background: #2a6; color: white; }
+#output, #rawtext { width: 100%; min-height: 400px; font-family: monospace; font-size: 0.9em; padding: 10px; border: 1px solid #999; border-radius: 0 5px 5px 5px; box-sizing: border-box; }
+.hidden { display: none; }
+.status { text-align: center; color: #555; margin: 10px 0; }
+.progress { width: 100%; height: 6px; background: #eee; border-radius: 3px; margin: 10px 0; overflow: hidden; }
+.progress-bar { height: 100%; background: #2a6; width: 0%; transition: width 0.3s; }
+.actions { display: flex; gap: 10px; justify-content: center; margin: 10px 0; }
+.actions button { margin: 0; padding: 8px 20px; font-size: 0.9em; }
+.options { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0; }
+.options label { display: flex; align-items: center; gap: 8px; margin: 5px 0; cursor: pointer; }
+.options select { padding: 4px 8px; }
+#debug-preview { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+#debug-preview canvas { max-height: 200px; border: 1px solid #ccc; border-radius: 3px; }
+</style>
+</head>
+<body>
+<h1>📷 Buchseiten → YAML (lokal)</h1>
+<p>OCR mit Tesseract.js + Bildvorverarbeitung mit OpenCV.js. Alles lokal im Browser.</p>
+
+<div class="options">
+  <label><input type="checkbox" id="opt-split" checked> Doppelseite splitten (links/rechts)</label>
+  <label><input type="checkbox" id="opt-adaptive" checked> Adaptive Binarisierung (lokaler Kontrast)</label>
+  <label><input type="checkbox" id="opt-deskew" checked> Automatisch geraderichten (Deskew)</label>
+  <label><input type="checkbox" id="opt-denoise" checked> Rauschentfernung</label>
+  <label><input type="checkbox" id="opt-debug"> Vorschau der vorverarbeiteten Bilder anzeigen</label>
+  <label>Rotation: <select id="opt-rotate"><option value="0">0°</option><option value="90">90° rechts</option><option value="180">180°</option><option value="270">90° links</option></select></label>
+</div>
+
+<div class="drop-zone" id="dropzone">
+  📁 Bilder hier ablegen oder klicken zum Auswählen
+  <input type="file" id="fileinput" multiple accept="image/*" hidden>
+</div>
+<div class="previews" id="previews"></div>
+
+<button id="convert" onclick="convert()" disabled>Text erkennen & YAML erzeugen</button>
+<div class="progress"><div class="progress-bar" id="progressbar"></div></div>
+<p class="status" id="status"></p>
+<div id="debug-preview"></div>
+
+<div class="tabs">
+  <button class="active" onclick="showTab('yaml')">YAML</button>
+  <button onclick="showTab('raw')">Rohtext</button>
+</div>
+<textarea id="output" placeholder="Hier erscheint das erzeugte YAML..."></textarea>
+<textarea id="rawtext" class="hidden" placeholder="Hier erscheint der erkannte Rohtext..."></textarea>
+
+<div class="actions">
+  <button onclick="navigator.clipboard.writeText(document.getElementById('output').value)">📋 YAML kopieren</button>
+  <button onclick="downloadYaml()">💾 Als YAML speichern</button>
+</div>
+
+<script async src="https://docs.opencv.org/4.9.0/opencv.js" onload="onCvReady()"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+let cvReady = false;
+function onCvReady() { cvReady = true; console.log('OpenCV ready'); }
+
+const dropzone = document.getElementById('dropzone');
+const fileinput = document.getElementById('fileinput');
+const previews = document.getElementById('previews');
+const btn = document.getElementById('convert');
+let files = [];
+
+dropzone.addEventListener('click', () => fileinput.click());
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('dragover'); addFiles(e.dataTransfer.files); });
+fileinput.addEventListener('change', () => addFiles(fileinput.files));
+
+function addFiles(newFiles) {
+  for (const f of newFiles) if (f.type.startsWith('image/')) files.push(f);
+  previews.innerHTML = files.map(f => `<img src="${URL.createObjectURL(f)}">`).join('');
+  btn.disabled = files.length === 0;
+}
+
+function showTab(tab) {
+  document.getElementById('output').classList.toggle('hidden', tab !== 'yaml');
+  document.getElementById('rawtext').classList.toggle('hidden', tab !== 'raw');
+  document.querySelectorAll('.tabs button').forEach((b, i) => b.classList.toggle('active', (tab === 'yaml' ? i === 0 : i === 1)));
+}
+
+// --- OpenCV Vorverarbeitung ---
+
+function loadImageToCanvas(file) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.width; c.height = img.height;
+      c.getContext('2d').drawImage(img, 0, 0);
+      resolve(c);
+    };
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+function cvRotate(src, degrees) {
+  if (degrees === 0) return src;
+  let dst = new cv.Mat();
+  if (degrees === 90) cv.rotate(src, dst, cv.ROTATE_90_CLOCKWISE);
+  else if (degrees === 180) cv.rotate(src, dst, cv.ROTATE_180);
+  else if (degrees === 270) cv.rotate(src, dst, cv.ROTATE_90_COUNTERCLOCKWISE);
+  src.delete();
+  return dst;
+}
+
+function cvDeskew(src) {
+  // Convert to grayscale, detect edges, find dominant angle via HoughLines
+  let gray = new cv.Mat();
+  cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+  let edges = new cv.Mat();
+  cv.Canny(gray, edges, 50, 150);
+
+  let lines = new cv.Mat();
+  cv.HoughLinesP(edges, lines, 1, Math.PI / 180, 100, 100, 10);
+
+  let angles = [];
+  for (let i = 0; i < lines.rows; i++) {
+    const x1 = lines.data32S[i * 4], y1 = lines.data32S[i * 4 + 1];
+    const x2 = lines.data32S[i * 4 + 2], y2 = lines.data32S[i * 4 + 3];
+    const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+    if (Math.abs(angle) < 15) angles.push(angle); // nur nahezu horizontale Linien
+  }
+  gray.delete(); edges.delete(); lines.delete();
+
+  if (angles.length === 0) return src;
+
+  // Median-Winkel
+  angles.sort((a, b) => a - b);
+  const medianAngle = angles[Math.floor(angles.length / 2)];
+
+  if (Math.abs(medianAngle) < 0.3) return src; // zu klein, nicht korrigieren
+
+  const center = new cv.Point(src.cols / 2, src.rows / 2);
+  const M = cv.getRotationMatrix2D(center, medianAngle, 1.0);
+  let dst = new cv.Mat();
+  cv.warpAffine(src, dst, M, new cv.Size(src.cols, src.rows), cv.INTER_LINEAR, cv.BORDER_REPLICATE);
+  src.delete(); M.delete();
+  return dst;
+}
+
+function cvAdaptiveBinarize(src) {
+  let gray = new cv.Mat();
+  if (src.channels() > 1) cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+  else gray = src.clone();
+  let dst = new cv.Mat();
+  cv.adaptiveThreshold(gray, dst, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 31, 12);
+  gray.delete(); src.delete();
+  return dst;
+}
+
+function cvDenoise(src) {
+  let dst = new cv.Mat();
+  // Morphological open to remove small noise
+  let kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(2, 2));
+  cv.morphologyEx(src, dst, cv.MORPH_OPEN, kernel);
+  kernel.delete(); src.delete();
+  return dst;
+}
+
+function cvSplit(src) {
+  // Find the vertical middle by looking for a dark/low-variance stripe
+  let gray = src;
+  if (src.channels() > 1) {
+    gray = new cv.Mat();
+    cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+  }
+  
+  const w = gray.cols, h = gray.rows;
+  const searchStart = Math.floor(w * 0.4);
+  const searchEnd = Math.floor(w * 0.6);
+  
+  // Find column with most white (= gap between pages)
+  let bestCol = Math.floor(w / 2), bestWhite = 0;
+  for (let x = searchStart; x < searchEnd; x += 2) {
+    let white = 0;
+    for (let y = 0; y < h; y += 4) {
+      if (gray.ucharAt(y, x) > 200) white++;
+    }
+    if (white > bestWhite) { bestWhite = white; bestCol = x; }
+  }
+  
+  if (gray !== src) gray.delete();
+
+  let left = src.roi(new cv.Rect(0, 0, bestCol, h));
+  let right = src.roi(new cv.Rect(bestCol, 0, w - bestCol, h));
+  let leftClone = left.clone();
+  let rightClone = right.clone();
+  left.delete(); right.delete(); src.delete();
+  return [leftClone, rightClone];
+}
+
+function matToBlob(mat) {
+  const canvas = document.createElement('canvas');
+  cv.imshow(canvas, mat);
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+}
+
+async function preprocessImage(file) {
+  if (!cvReady) { alert('OpenCV lädt noch...'); return []; }
+
+  const canvas = await loadImageToCanvas(file);
+  let src = cv.imread(canvas);
+
+  const rotate = parseInt(document.getElementById('opt-rotate').value);
+  const doSplit = document.getElementById('opt-split').checked;
+  const doAdaptive = document.getElementById('opt-adaptive').checked;
+  const doDeskew = document.getElementById('opt-deskew').checked;
+  const doDenoise = document.getElementById('opt-denoise').checked;
+  const showDebug = document.getElementById('opt-debug').checked;
+
+  // 1. Rotation
+  src = cvRotate(src, rotate);
+
+  // 2. Split
+  let pages = doSplit ? cvSplit(src) : [src];
+
+  // 3. Per page: deskew, binarize, denoise
+  let results = [];
+  for (let page of pages) {
+    if (doDeskew) page = cvDeskew(page);
+    if (doAdaptive) page = cvAdaptiveBinarize(page);
+    if (doDenoise) page = cvDenoise(page);
+
+    if (showDebug) {
+      const debugCanvas = document.createElement('canvas');
+      cv.imshow(debugCanvas, page);
+      document.getElementById('debug-preview').appendChild(debugCanvas);
+    }
+
+    results.push(await matToBlob(page));
+    page.delete();
+  }
+  return results;
+}
+
+// --- OCR ---
+
+async function convert() {
+  btn.disabled = true;
+  document.getElementById('debug-preview').innerHTML = '';
+  const status = document.getElementById('status');
+  const bar = document.getElementById('progressbar');
+
+  status.textContent = 'Lade Tesseract (deutsch)...';
+  const worker = await Tesseract.createWorker('deu', 1, {
+    logger: m => { if (m.status === 'recognizing text') bar.style.width = (m.progress * 100) + '%'; }
+  });
+  // PSM 6 = single uniform block of text (besser für vorverarbeitete Seiten)
+  await worker.setParameters({ tessedit_pageseg_mode: '6' });
+
+  let allText = '';
+  let pageNum = 0;
+  for (let i = 0; i < files.length; i++) {
+    status.textContent = `Vorverarbeitung Bild ${i + 1}/${files.length}...`;
+    const pages = await preprocessImage(files[i]);
+    for (const page of pages) {
+      pageNum++;
+      status.textContent = `Erkenne Seite ${pageNum}...`;
+      bar.style.width = '0%';
+      const { data: { text } } = await worker.recognize(page);
+      allText += `--- Seite ${pageNum} ---\n${text}\n\n`;
+    }
+  }
+  await worker.terminate();
+
+  const cleaned = cleanText(allText);
+  document.getElementById('rawtext').value = cleaned;
+  document.getElementById('output').value = textToYaml(cleaned);
+  bar.style.width = '100%';
+  status.textContent = `✓ Fertig – ${pageNum} Seite(n) erkannt.`;
+  btn.disabled = false;
+}
+
+// --- Textbereinigung & Zusammenführung ---
+
+function cleanText(text) {
+  const lines = text.split('\n');
+  const result = [];
+  for (let i = 0; i < lines.length; i++) {
+    let l = lines[i].trim();
+    if (l.startsWith('---')) { result.push(l); continue; }
+    // Strip leading pipes, brackets, dashes (OCR page-edge artifacts)
+    l = l.replace(/^[|[\]—–\-_<>»«]+\s*/, '');
+    if (l.length < 3) continue;
+    // Lines that are mostly non-letter garbage
+    const letters = l.replace(/[^a-zA-ZäöüÄÖÜßéè ]/g, '').length;
+    if (l.length > 3 && letters / l.length < 0.4) continue;
+    // Single short uppercase fragments (OCR noise like "AO", "ZEN", "BL")
+    if (l.length < 6 && /^[A-ZÄÖÜ\s.\-_]+$/.test(l)) continue;
+    // Lines that are just page numbers
+    if (/^\d{1,3}$/.test(l)) continue;
+    result.push(l);
+  }
+  // Merge fragments: join lines that don't end a sentence with the next line
+  const merged = [];
+  for (let i = 0; i < result.length; i++) {
+    const line = result[i];
+    if (line.startsWith('---')) { merged.push(line); continue; }
+    let combined = line;
+    while (i + 1 < result.length && !result[i + 1].startsWith('---')) {
+      const next = result[i + 1];
+      // Stop merging if current line ends a sentence/question
+      if (/[.:?!)"]\s*$/.test(combined)) break;
+      // Stop if next line itself looks like a new question (starts with capital + long enough)
+      if (/^(Hier|Haben|Fällt|Neigen|Können|Sind|Wurden|Möchten|Wollen|Gehen|Gibt|War|Fühlen|Passiert|Machen|Geht|Wird|Sagen|Hatten)/.test(next) && next.length > 30) break;
+      // Stop if next line is "Ja/Nein"
+      if (/^\s*Ja\s*[\[\](_|]*\s*Nein/i.test(next)) break;
+      // Merge
+      i++;
+      combined += ' ' + next;
+      if (combined.length > 300) break;
+    }
+    merged.push(combined);
+  }
+  return merged.join('\n');
+}
+
+// --- Text → YAML ---
+
+function textToYaml(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0 && !l.startsWith('---'));
+  const sections = [];
+  let currentSection = null;
+  let qCounter = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (/^(Kapitel|Abschnitt|Teil)\s+\d/i.test(line)) {
+      currentSection = { title: line, questions: [] };
+      sections.push(currentSection);
+      continue;
+    }
+
+    if (!currentSection) {
+      currentSection = { title: 'Abschnitt 1', questions: [] };
+      sections.push(currentSection);
+    }
+
+    // Skip standalone Ja/Nein lines
+    if (/^\s*Ja\s*[\[\](_|]*\s*Nein\s*[\[\](_|"]*\s*$/i.test(line)) continue;
+
+    // Skip obvious artifacts: too short, no real words, starts with lowercase fragment
+    if (line.length < 15) continue;
+    if (!/[a-zäöü]{3,}/i.test(line)) continue;
+
+    // Frage erkennen: endet mit : oder ?
+    if (/[:?]\s*$/.test(line)) {
+      // Extra validation: must contain at least 3 German words
+      const words = line.split(/\s+/).filter(w => /^[a-zA-ZäöüÄÖÜß„"()]+$/.test(w));
+      if (words.length < 3) continue;
+
+      qCounter++;
+      currentSection.questions.push({
+        id: 'q' + qCounter,
+        text: line,
+        type: guessType(line)
+      });
+    }
+  }
+
+  let yaml = 'title: "Fragebogen"\nsections:\n';
+  for (const s of sections) {
+    yaml += `  - title: "${esc(s.title)}"\n    questions:\n`;
+    for (const q of s.questions) {
+      yaml += `      - id: ${q.id}\n        text: "${esc(q.text)}"\n        type: ${q.type}\n`;
+    }
+    if (s.questions.length === 0) yaml += '      # (keine Fragen erkannt)\n';
+  }
+  if (sections.length === 0) yaml += '  # (keine Struktur erkannt)\n';
+  return yaml;
+}
+
+function guessType(line) {
+  if (/\bJa\b.*\bNein\b/i.test(line) || /\?\s*$/.test(line)) return 'yesno';
+  if (/(name|datum|tag|monat|jahr|stadt|land|ort|plz|telefon|email|punkt)/i.test(line)) return 'text';
+  if (/(beschreib|erzähl|erklär|schilder|bericht|verfass|notier|darstel|Anmerkung)/i.test(line)) return 'textarea';
+  return line.length > 80 ? 'textarea' : 'text';
+}
+
+function esc(s) { return s.replace(/"/g, '\\"').replace(/\n/g, ' '); }
+
+function downloadYaml() {
+  const blob = new Blob([document.getElementById('output').value], { type: 'text/yaml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'questions.yaml';
+  a.click();
+}
+</script>
+</body>
+</html>
