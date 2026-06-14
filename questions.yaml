@@ -1,0 +1,732 @@
+title: "Autismus-Diagnostik Workbook"
+sections:
+  - title: "Kapitel 1: Einleitung und Anleitung zur Arbeit mit diesem Buch"
+    description: |
+      Eine aussagekräftige Autismus-Diagnostik beruht auf einer fundierten und umfassenden Sammlung von Informationen über die jeweilige Person: Neben dem Verhalten müssen auch das innere Erleben sowie der individuelle Werdegang im Detail betrachtet werden. Also ist nicht nur die aktuelle Situation zu analysieren, sondern auch die Vergangenheit zu berücksichtigen. Denn bei Autismus handelt es sich nach der ICD-11 (WHO, 2025) um eine lebenslange, neuronale Entwicklungsstörung, die bereits in der frühsten Kindheit ihren Anfang nimmt.
+
+      Das Ziel dieses Buches ist es, bei ebendieser Informationssammlung behilflich zu sein. Vielen autistischen Menschen fällt es nämlich schwer (z. B. aufgrund von Defiziten in den exekutiven Funktionen), eine systematische Zusammenstellung aussagekräftiger Unterlagen anzufertigen. Jedoch ist dies für eine Autismus-Diagnostik prinzipiell notwendig – im schlimmsten Fall kann es sogar zu einem falschen Ergebnis kommen, wenn nicht genügend Informationen vorliegen. Dies gilt es zu vermeiden.
+
+      So bietet dieses Buch Ihnen den Raum, Notizen über Ihren bisherigen Lebenslauf, Ihre Person, Ihr Empfinden sowie Ihre Verhaltensweisen und Auffälligkeiten zu erstellen. Dies soll es Ihnen erleichtern, die typischen Fragen zu beantworten, die man Ihnen im Rahmen einer Diagnostik ohnehin stellen wird.
+
+      Um keine Missverständnisse aufkommen zu lassen: Dieses Buch ersetzt keine Diagnostik und kann sowie will sie auch nicht ersetzen oder durchführen. Eine ausführliche und fundierte Informationssammlung kann einen Diagnoseprozess jedoch womöglich beschleunigen und dem Entstehen von Fehlern entgegenwirken. In der Hoffnung, (autistischen) Menschen auf ihrem Weg zu helfen, wurde dieses Buch verfasst.
+
+      Soziale Interaktion stellt für viele Autist:innen eine große Herausforderung dar und ein Diagnostikgespräch ist nichts anderes als eine solche soziale Interaktion. Deshalb ist es nur verständlich, wenn Sie sich dann ein Hilfsmittel (wie dieses Workbook) mit sich führen möchten. In ihm werden sich nämlich zahlreiche wichtige Details befinden, sobald Sie es durchgearbeitet haben.
+
+      Dieses Workbook wurde so verfasst, dass Sie es nicht „an einem Stück" durcharbeiten müssen. Sie können es jederzeit weglegen und die Bearbeitung zu einem beliebigen Zeitpunkt fortsetzen. Der Aufbau dieses Buches folgt einem einheitlichen Muster: thematisch sortiert finden Sie zahlreiche Fragen (beispielsweise zu Ihrer Person, zu Ihrem Verhalten oder zu Ihren Auffälligkeiten) und die meisten dieser Fragen sollen Sie zunächst entweder mit „Ja" oder „Nein" beantworten. Dieses Antwortformat soll Sie dazu anregen, sich vertiefend zu dem jeweiligen Aspekt Gedanken zu machen.
+
+      Somit soll das dichotome Antwortformat (Ja/Nein) Sie nicht einengen, sondern unterstützen. Weil es sogar vollkommen verständlich ist, dass Ihre eigentliche Antwort in vielen Fällen vermutlich komplexer ausfallen wird, gibt es fast immer die Möglichkeit, weitere Anmerkungen zu notieren. Dazu werden Ihnen Freitextbereiche zur Verfügung gestellt.
+
+      In diesem Buch sind die Fragen in aller Regel so formuliert, dass die Antwort „Ja" mit Blick auf die Diagnosekriterien für Autismus und/oder die wissenschaftliche Evidenz zum Thema Autismus ein Indiz dafür darstellt, dass Autismus tendenziell vorliegen könnte.
+
+      Bitte arbeiten Sie nur dann mit diesem Workbook, wenn Sie sich psychisch sowie emotional dazu in der Lage fühlen.
+    questions: []
+
+  - title: "Kapitel 2: Allgemeine Rahmeninformationen"
+    description: "In diesem Kapitel geht es darum, dass Sie zentrale Rahmeninformationen zu Ihrer Person erfassen. Solche werden im Kontext einer Diagnostik in aller Regel erfragt. Während der Diagnostiksituation kann es jedoch vorkommen, dass Sie sogar vermeintlich „einfache\" Details über sich selbst vergessen oder dass Sie Probleme haben, mit einer Person, die Ihnen fremd ist, zu sprechen. Die Notizen, die Sie in diesem Kapitel anfertigen, können Ihnen in einer Diagnostiksituation dann als „Spicker\" und Orientierungshilfe dienen."
+    questions:
+      - id: kap2_name
+        text: "Das ist Ihr Name (Vorname/Vornamen und Nachname/Nachnamen):"
+        type: text
+      - id: kap2_geburtsdatum
+        text: "An diesem Tag wurden Sie geboren (Datum: Tag/Monat/Jahr):"
+        type: text
+      - id: kap2_geschlecht
+        text: "Das ist Ihr Geschlecht:"
+        type: choice
+        options:
+          - "weiblich"
+          - "männlich"
+          - "divers"
+          - "unzutreffend"
+      - id: kap2_geburtsstadt
+        text: "In dieser Stadt wurden Sie geboren:"
+        type: text
+      - id: kap2_geburtsland
+        text: "In diesem Land wurden Sie geboren:"
+        type: text
+      - id: kap2_muttersprache
+        text: "Dies ist Ihre Muttersprache (die Sprache, die Sie zuerst erlernt haben):"
+        type: text
+      - id: kap2_sprachen_zuhause
+        text: "Diese Sprachen wurden in Ihrer Kindheit bei Ihnen zu Hause gesprochen:"
+        type: text
+      - id: kap2_sprachen_beherrschen
+        text: "Diese Sprachen beherrschen Sie (gerne können Sie auch angeben, wie gut Sie welche Sprachen sprechen):"
+        type: textarea
+      - id: kap2_verhaeltnis_eltern_kindheit
+        text: "Hier können Sie Ihr Verhältnis zu Ihren Eltern in Ihrer Kindheit beschreiben:"
+        type: textarea
+      - id: kap2_verhaeltnis_eltern_jugend
+        text: "Hier können Sie Ihr Verhältnis zu Ihren Eltern in Ihrer Jugend beschreiben:"
+        type: textarea
+      - id: kap2_verhaeltnis_eltern_heute
+        text: "Hier können Sie Ihr heutiges Verhältnis zu Ihren Eltern beschreiben:"
+        type: textarea
+      - id: kap2_kontakt_eltern
+        text: "Haben Sie heutzutage noch Kontakt zu Ihren Eltern?"
+        type: yesno
+      - id: kap2_freunde_kindheit
+        text: "Hatten Sie in Ihrer Kindheit Freund:innen?"
+        type: yesno
+      - id: kap2_freunde_kindheit_gewollt
+        text: "Wollten Sie in Ihrer Kindheit Freund:innen haben?"
+        type: yesno
+      - id: kap2_anmerkungen_freundschaften_kindheit
+        text: "Hier können Sie Anmerkungen zu Ihren Freundschaften in Ihrer Kindheit verfassen:"
+        type: textarea
+      - id: kap2_freunde_jugend
+        text: "Hatten Sie in Ihrer Jugend Freund:innen?"
+        type: yesno
+      - id: kap2_freunde_jugend_gewollt
+        text: "Wollten Sie in Ihrer Jugend Freund:innen haben?"
+        type: yesno
+      - id: kap2_anmerkungen_freundschaften_jugend
+        text: "Hier können Sie Anmerkungen zu Ihren Freundschaften in Ihrer Jugend verfassen:"
+        type: textarea
+      - id: kap2_freunde_heute
+        text: "Haben Sie heutzutage Freund:innen?"
+        type: yesno
+      - id: kap2_freunde_heute_gewollt
+        text: "Wollen Sie heutzutage Freund:innen haben?"
+        type: yesno
+      - id: kap2_anmerkungen_freundschaften_heute
+        text: "Hier können Sie Anmerkungen zu Ihren heutigen Freundschaften verfassen:"
+        type: textarea
+      - id: kap2_stoerungen_diagnostiziert
+        text: "Haben Sie bereits bestimmte Störungen/Krankheiten diagnostiziert bekommen?"
+        type: yesno
+      - id: kap2_stoerungen_welche
+        text: "Hier können Sie zusammenfassen, welche Krankheiten/Störungen bei Ihnen bereits diagnostiziert wurden:"
+        type: textarea
+      - id: kap2_weitere_stoerungen
+        text: "Vermuten Sie weitere Störungen/Krankheiten bei sich, die bisher nicht diagnostiziert wurden?"
+        type: yesno
+      - id: kap2_weitere_stoerungen_welche
+        text: "Hier können Sie darstellen, welche Störungen/Krankheiten Sie außerdem bei sich vermuten (und Sie können begründen, warum Sie dies vermuten):"
+        type: textarea
+      - id: kap2_falschdiagnosen
+        text: "Vermuten Sie, dass einige Störungen/Krankheiten, die bei Ihnen bereits diagnostiziert wurden, eigentlich Falschdiagnosen sind?"
+        type: yesno
+      - id: kap2_falschdiagnosen_welche
+        text: "Hier können Sie darstellen, welche bei Ihnen diagnostizierten Störungen/Krankheiten aus Ihrer Sicht vermutlich Falschdiagnosen sind (und Sie können auch begründen, warum Sie dies vermuten):"
+        type: textarea
+      - id: kap2_missverstanden
+        text: "Fühlen Sie sich von anderen Personen öfters missverstanden?"
+        type: yesno
+      - id: kap2_missverstanden_details
+        text: "Hier können Sie weitere Angaben dazu machen, ob/inwiefern (z. B. wann und wo) Sie sich missverstanden fühlen:"
+        type: textarea
+      - id: kap2_mobbing
+        text: "Haben Sie während Ihrer Schulzeit, Ihrer Ausbildung, Ihres Studiums, Ihrer Arbeitstätigkeit oder in einem anderen Kontext Mobbing erfahren?"
+        type: yesno
+      - id: kap2_mobbing_anmerkungen
+        text: "Hier können Sie Anmerkungen zu Ihren Mobbingerfahrungen verfassen:"
+        type: textarea
+      - id: kap2_schulabschluss
+        text: "Haben Sie einen Schulabschluss?"
+        type: yesno
+      - id: kap2_schulabschluss_anmerkungen
+        text: "Hier können Sie Anmerkungen zum Vorliegen/Nicht-Vorliegen eines Schulabschlusses verfassen:"
+        type: textarea
+      - id: kap2_berufsausbildung
+        text: "Haben Sie eine abgeschlossene Berufsausbildung?"
+        type: yesno
+      - id: kap2_berufsausbildung_anmerkungen
+        text: "Hier können Sie Anmerkungen zum Vorliegen/Nicht-Vorliegen einer abgeschlossenen Berufsausbildung verfassen:"
+        type: textarea
+      - id: kap2_studium
+        text: "Haben Sie ein Studium abgeschlossen?"
+        type: yesno
+      - id: kap2_studium_anmerkungen
+        text: "Hier können Sie Anmerkungen zum Vorliegen/Nicht-Vorliegen eines abgeschlossenen Studiums verfassen:"
+        type: textarea
+      - id: kap2_bildungsweg_zufrieden
+        text: "Sind Sie mit Ihrem bisherigen Bildungsweg zufrieden?"
+        type: yesno
+      - id: kap2_bildungsweg_anmerkungen
+        text: "Hier können Sie weitere Anmerkungen zu Ihrem Bildungsweg verfassen:"
+        type: textarea
+      - id: kap2_beruf_aktuell
+        text: "Gehen Sie aktuell einem Beruf nach? (Bei Arbeitslosigkeit, Rente o. Ä. kreuzen Sie bitte „Nein\" an)"
+        type: yesno
+      - id: kap2_berufliche_situation
+        text: "Hier können Sie Ihre berufliche Situation näher erläutern (ggf. auch Aspekte aus Ihrer Vergangenheit):"
+        type: textarea
+      - id: kap2_familie_autismus
+        text: "Gibt es in Ihrer Familie mindestens eine Person mit einer gesicherten Autismusdiagnose?"
+        type: yesno
+      - id: kap2_familie_autismus_vermutet
+        text: "Gibt es in Ihrer Familie Personen, bei denen Sie Autismus vermuten?"
+        type: yesno
+      - id: kap2_elternteil_ueber_30
+        text: "War mindestens eines Ihrer Elternteile bei Ihrer Geburt schon über 30 Jahre alt?"
+        type: yesno
+      - id: kap2_elternteil_ueber_40
+        text: "War mindestens eines Ihrer Elternteile bei Ihrer Geburt schon über 40 Jahre alt?"
+        type: yesno
+      - id: kap2_familie_sonstiges
+        text: "Falls Sie noch etwas zu Ihrer Familie erwähnen möchten, können Sie dies hier tun:"
+        type: textarea
+      - id: kap2_grundlegendes_person
+        text: "Insofern Sie etwas Grundlegendes zu Ihrer Person mitteilen möchten, das Sie bisher nicht mitgeteilt haben, können Sie dies an dieser Stelle nachholen:"
+        type: textarea
+      - id: kap2_wichtig_diagnostik
+        text: "Falls es etwas gibt, das Ihnen sehr wichtig ist und das Sie während einer Diagnostik auf jeden Fall sagen oder fragen möchten, können Sie dies an dieser Stelle notieren:"
+        type: textarea
+
+  - title: "Kapitel 3.1: Zentrale Auffälligkeiten in der sozialen Interaktion und Kommunikation"
+    description: "In diesem Kapitel sollen Sie einschätzen, ob spezifische Aspekte auf Sie zutreffen (Ja/Nein). Des Weiteren können Sie ergänzende Anmerkungen verfassen."
+    questions:
+      - id: kap31_blickkontakt
+        text: "Fällt es Ihnen schwer, in der Art Blickkontakt zu halten, wie er von anderen Personen gewünscht oder als angemessen empfunden wird? (Hilfestellung: Hat Ihnen bereits mindestens eine Person gesagt, dass Sie sie „nicht richtig\" anschauen würden?)"
+        type: yesno
+      - id: kap31_anstarren
+        text: "Neigen Sie dazu, andere Personen anzustarren? (zu intensiver Blickkontakt)"
+        type: yesno
+      - id: kap31_blickkontakt_vermeiden
+        text: "Neigen Sie dazu, den Blickkontakt mit anderen Menschen zu vermeiden?"
+        type: yesno
+      - id: kap31_blickkontakt_auffaellig
+        text: "Wurden Sie schon darauf angesprochen, dass Ihr Blickkontakt „auffällig\" oder „nicht korrekt\" sei (z. B.: „Guck doch nicht so böse!\")?"
+        type: yesno
+      - id: kap31_blickkontakt_anmerkungen
+        text: "Hier können Sie Anmerkungen zum Thema Blickkontakt verfassen:"
+        type: textarea
+      - id: kap31_gestik_verstehen
+        text: "Fällt es Ihnen leicht, die Gestik, Mimik (= Gesichtsausdrücke) oder Körpersprache anderer Personen zu verstehen?"
+        type: yesno
+      - id: kap31_gestik_verstehen_anmerkungen
+        text: "Hier können Sie Anmerkungen dazu verfassen, ob/inwiefern Sie die von anderen Personen eingesetzte Gestik, Mimik oder Körpersprache (nicht) verstehen können:"
+        type: textarea
+      - id: kap31_gestik_benutzen
+        text: "Fällt es Ihnen leicht, Gestik, Mimik (= Gesichtsausdrücke) oder Körpersprache in sozialen Situationen korrekt zu benutzen?"
+        type: yesno
+      - id: kap31_gestik_benutzen_anmerkungen
+        text: "Hier können Sie Anmerkungen zum Einsatz Ihrer eigenen Gestik, Mimik oder Körpersprache verfassen:"
+        type: textarea
+      - id: kap31_grimmig
+        text: "Sagen Ihnen manchmal andere Personen, dass Sie nicht so grimmig o. Ä. schauen sollen, obwohl Sie sich gut fühlen / Sie zufrieden sind?"
+        type: yesno
+      - id: kap31_grimmig_anmerkungen
+        text: "Hier können Sie Anmerkungen zu dieser Thematik/zu solchen Erlebnissen verfassen:"
+        type: textarea
+      - id: kap31_freundschaften_knuepfen
+        text: "Fällt es Ihnen leicht, neue Freundschaften zu knüpfen?"
+        type: yesno
+      - id: kap31_freundschaften_knuepfen_anmerkungen
+        text: "Hier können Sie Anmerkungen zu Ihren Erfahrungen beim Knüpfen neuer Freundschaften verfassen:"
+        type: textarea
+      - id: kap31_freundschaften_aufrechterhalten
+        text: "Fällt es Ihnen leicht, Freundschaften aufrechtzuerhalten?"
+        type: yesno
+      - id: kap31_freundschaften_aufrechterhalten_anmerkungen
+        text: "Hier können Sie Anmerkungen zu Ihren Erfahrungen beim Aufrechterhalten von Freundschaften aufschreiben:"
+        type: textarea
+      - id: kap31_verstellen
+        text: "Haben Sie das Gefühl, sich ständig verstellen zu müssen, damit andere Sie mögen/für sympathisch halten/„nicht schrecklich\" finden? (Alternative Formulierung: Haben Sie das Gefühl, dass andere Menschen Sie nicht mögen würden, wenn Sie sich so zeigen oder verhalten würden, wie Sie wirklich sind?)"
+        type: yesno
+      - id: kap31_verstellen_anmerkungen
+        text: "Hier können Sie vermerken, ob/inwiefern Sie sich verstellen müssen:"
+        type: textarea
+      - id: kap31_soziale_situationen_anstrengend
+        text: "Sind soziale Situationen für Sie sehr anstrengend? Kosten soziale Situationen Sie sehr viel Energie/Kraft?"
+        type: yesno
+      - id: kap31_soziale_situationen_anmerkungen
+        text: "Hier können Sie vermerken, ob/inwiefern Ihnen soziale Situationen anstrengend vorkommen:"
+        type: textarea
+      - id: kap31_mehr_freundschaften
+        text: "Möchten Sie gerne (mehr) Freundschaften haben?"
+        type: yesno
+      - id: kap31_mehr_freundschaften_anmerkungen
+        text: "Hier können Sie vermerken, ob Sie gerne (mehr) Freundschaften haben möchten bzw. wo das Problem aus Ihrer Sicht liegt:"
+        type: textarea
+      - id: kap31_partnerschaft
+        text: "Möchten Sie gerne eine feste Partnerschaft/(romantische) Liebesbeziehung führen?"
+        type: yesno
+      - id: kap31_partnerschaft_anmerkungen
+        text: "Hier können Sie Ihre Anmerkungen dazu verfassen, ob/inwiefern Sie gerne eine feste Partnerschaft/Liebesbeziehung führen möchten:"
+        type: textarea
+      - id: kap31_hierarchien
+        text: "Haben Sie Probleme damit, Hierarchien (z. B. auf der Arbeit) zu erkennen, zu verstehen und/oder zu akzeptieren?"
+        type: yesno
+      - id: kap31_hierarchien_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie Probleme mit Hierarchien haben:"
+        type: textarea
+      - id: kap31_abstand
+        text: "Können Sie zu anderen Personen intuitiv einen angemessenen Abstand finden/einhalten (z. B. gilt es als angemessen, zu guten Freunden einen anderen körperlichen Abstand zu halten als zu Personen, die man nicht oder weniger gut kennt)?"
+        type: yesno
+      - id: kap31_abstand_anmerkungen
+        text: "Hier können Sie genauer darstellen, ob/inwiefern Sie zu anderen Personen intuitiv einen angemessenen Abstand halten können:"
+        type: textarea
+      - id: kap31_oversharing
+        text: "Können Sie korrekt einschätzen, mit welchen Personen Sie welche Themen besprechen sollten / nicht besprechen sollten? (Stichwort: „Oversharing\")"
+        type: yesno
+      - id: kap31_oversharing_anmerkungen
+        text: "Hier können Sie genauer erklären, ob/inwiefern Sie einschätzen können, mit welchen Personen Sie welche Themen besprechen sollten / nicht besprechen sollten:"
+        type: textarea
+      - id: kap31_kontakt_aufnehmen
+        text: "Wenn Sie zu Personen, die Ihnen (eher) fremd sind, Kontakt aufnehmen möchten oder müssen (z. B. per Telefon, Mail oder im echten Leben): Wissen Sie dann, wie Sie das anstellen können / was Sie sagen sollen oder dürfen?"
+        type: yesno
+      - id: kap31_kontakt_aufnehmen_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern es Ihnen Probleme bereitet, wenn Sie zu anderen Personen Kontakt aufnehmen müssen:"
+        type: textarea
+      - id: kap31_mails_telefonieren
+        text: "Fällt Ihnen das Verfassen von Mails oder das Telefonieren leichter?"
+        type: choice
+        options:
+          - "Mails"
+          - "Telefonieren"
+      - id: kap31_mails_telefonieren_anmerkungen
+        text: "Hier können Sie beschreiben, was Ihnen beim Verfassen von Mails und/oder beim Telefonieren Schwierigkeiten bereitet / leichtfällt:"
+        type: textarea
+      - id: kap31_gespraech_weiterfuehren
+        text: "Wenn Sie mit einer Person sprechen: Fällt es Ihnen dann schwer, das Gespräch weiterzuführen („Ja\" bedeutet also prinzipiell: Gespräche brechen regelmäßig plötzlich ab, weil Sie nicht wissen, was Sie sagen sollen)."
+        type: yesno
+      - id: kap31_gespraech_aufrechterhalten_anmerkungen
+        text: "Hier können Sie beschreiben, ob Sie wissen, wie Sie ein Gespräch aufrechterhalten können, oder was Ihnen beim Aufrechterhalten von Gesprächen Schwierigkeiten bereitet:"
+        type: textarea
+      - id: kap31_monologisieren
+        text: "Neigen Sie in Gesprächen dazu, zu monologisieren? Anders gefragt: Neigen Sie dazu, eher einen Vortrag zu halten, als ein „typisches Gespräch\" zu führen, in dem beide Seiten gleichermaßen zu Wort kommen?"
+        type: yesno
+      - id: kap31_monologisieren_anmerkungen
+        text: "Hier können Sie notieren, ob/inwiefern Sie andere Menschen kaum zu Wort kommen lassen, wenn Sie mit ihnen sprechen:"
+        type: textarea
+      - id: kap31_sprechen_an_der_reihe
+        text: "Erkennen Sie in Gesprächen, wann Sie mit dem Sprechen an der Reihe sind? (Unterbrechen Sie andere Menschen versehentlich, wenn diese sprechen, weil Sie denken, dass die andere Person schon fertig erzählt hat?)"
+        type: yesno
+      - id: kap31_unterbrechen_anmerkungen
+        text: "Hier können Sie genauer ausführen, ob/inwiefern Sie andere Menschen beim Sprechen unterbrechen:"
+        type: textarea
+      - id: kap31_antworten_passen
+        text: "Wenn Sie auf die Fragen einer Person antworten: Passt das, was Sie sagen, aus der Sicht anderer Personen zu der Frage, die Ihnen gestellt wurde?"
+        type: yesno
+      - id: kap31_antworten_passen_anmerkungen
+        text: "Hier können Sie beschreiben, inwiefern Ihre Antworten zu den Fragen anderer Personen passen beziehungsweise nicht passen (aus Ihrer Sicht und/oder aus der Sicht von anderen Personen; denken Sie an Rückmeldungen von anderen Personen, z. B. im Arbeitskontext oder beim Kontakt mit der Familie):"
+        type: textarea
+      - id: kap31_mitteilen
+        text: "Wenn Sie etwas sehr Positives, Negatives, Aufregendes, Interessantes etc. erleben: Haben Sie dann das Bedürfnis, dies anderen Personen mitzuteilen?"
+        type: yesno
+      - id: kap31_mitteilen_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie etwas anderen Personen mitteilen möchten bzw. dies auch tatsächlich tun:"
+        type: textarea
+      - id: kap31_soziale_interaktionen_zerdenken
+        text: "Machen Sie sich über anstehende soziale Interaktionen sehr viele Gedanken/zerdenken Sie solche Situationen? (z. B.: Sie spielen die gesamte Situation immer und immer wieder im Kopf durch, um auf die Situation vorbereitet zu sein)"
+        type: yesno
+      - id: kap31_zerdenken_anmerkungen
+        text: "Hier können Sie näher erläutern, ob/inwiefern Sie solche Situationen zerdenken – nennen Sie ggf. auch gern ein konkretes Beispiel:"
+        type: textarea
+      - id: kap31_erwachsene_als_kind
+        text: "Haben Sie sich als Kind lieber mit erwachsenen Menschen unterhalten als mit gleichaltrigen Kindern? Waren Ihnen als Kind erwachsene Menschen sympathischer als andere, gleichaltrige Kinder?"
+        type: yesno
+      - id: kap31_erwachsene_als_kind_anmerkungen
+        text: "Hier können Sie Ihre Erfahrungen zu diesem Thema genauer darstellen:"
+        type: textarea
+      - id: kap31_kontakt_juenger_aelter
+        text: "Insofern Sie heutzutage mit anderen Menschen Kontakt haben: Sind die Menschen, mit denen Sie sich gut verstehen, deutlich jünger oder älter als Sie?"
+        type: yesno
+      - id: kap31_kontakt_juenger_aelter_anmerkungen
+        text: "Hier können Sie Ihren Kontakt zu anderen Menschen genauer darstellen:"
+        type: textarea
+      - id: kap31_smalltalk
+        text: "Fällt es Ihnen schwer, vermeintlich „einfache Fragen\" zu beantworten (z. B. zum Wetter/zu Ihrem Befinden: „Wie geht es dir heute?\")? Alternative Formulierung dieser Frage: Fällt Ihnen Small-Talk schwer?"
+        type: yesno
+      - id: kap31_smalltalk_anmerkungen
+        text: "Hier können Sie genauer darstellen, was Ihnen Schwierigkeiten bereitet / was Ihnen gut gelingt:"
+        type: textarea
+      - id: kap31_sprechen_frueh_spaet
+        text: "Haben Sie als Kind auffällig früh oder spät mit dem Sprechen angefangen?"
+        type: yesno
+      - id: kap31_sprachentwicklung
+        text: "Hier können Sie notieren, wie sich Ihre Sprachfähigkeiten in der Kindheit entwickelt haben:"
+        type: textarea
+      - id: kap31_wortwahl
+        text: "Neigen Sie dazu, beim Sprechen eine andere Wortwahl als die meisten anderen Menschen zu benutzen? (z. B.: Sprechen Sie besonders gehoben/ähnelt Ihre Sprechsprache eher der Schriftsprache?)"
+        type: yesno
+      - id: kap31_wortwahl_anmerkungen
+        text: "Hier können Sie notieren, ob/inwiefern Ihre Sprache Auffälligkeiten aufweist:"
+        type: textarea
+      - id: kap31_ton_treffen
+        text: "Passiert es Ihnen, dass Sie beim Sprechen „nicht den richtigen Ton treffen\"? (z. B.: Sie meinen etwas freundlich, aber andere Personen denken, Ihre Aussage wäre beleidigend oder böse gemeint)"
+        type: yesno
+      - id: kap31_ton_treffen_anmerkungen
+        text: "Hier können Sie notieren, ob/inwiefern Sie dazu neigen, „nicht den richtigen Ton zu treffen\":"
+        type: textarea
+      - id: kap31_hineinversetzen
+        text: "Fällt es Ihnen schwer, sich in andere Personen hineinzuversetzen bzw. zu verstehen, warum andere Personen so handeln, wie sie handeln?"
+        type: yesno
+      - id: kap31_hineinversetzen_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern es Ihnen Schwierigkeiten bereitet, sich in andere Personen hineinzuversetzen oder das Handeln anderer Personen nachzuvollziehen:"
+        type: textarea
+      - id: kap31_ironie_sarkasmus
+        text: "Fällt es Ihnen schwer, Ironie oder Sarkasmus zu erkennen/zu verstehen?"
+        type: yesno
+      - id: kap31_ironie_sarkasmus_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie Schwierigkeiten haben, Ironie oder Sarkasmus zu erkennen/zu verstehen:"
+        type: textarea
+      - id: kap31_witze_nicht_verstehen
+        text: "Passiert es Ihnen regelmäßig, dass Sie Witze nicht verstehen (oder erst sehr spät im Nachhinein)?"
+        type: yesno
+      - id: kap31_witze_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie Schwierigkeiten beim Verstehen von Witzen haben:"
+        type: textarea
+      - id: kap31_witze_andere_verstehen_nicht
+        text: "Passiert es, dass Personen Ihre Witze / Ihren Sarkasmus o. Ä. nicht verstehen? (z. B. weil Sie Ihre Aussagen „zu trocken\" rüberbringen)"
+        type: yesno
+      - id: kap31_witze_andere_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern andere Personen Ihre Witze / Ihren Sarkasmus o. Ä. nicht verstehen (gerne können Sie auch eine konkrete Situation beschreiben, die sich in Ihrem Leben ereignet hat):"
+        type: textarea
+
+  - title: "Kapitel 3.2: Repetitive Verhaltensweisen und Stereotypien"
+    questions:
+      - id: kap32_reize
+        text: "Reagieren Sie in besonderer Weise auf Licht, Gerüche, Geschmäcker, Geräusche, Schmerzen und/oder andere Reize (= Überempfindlichkeit und/oder Unterempfindlichkeit auf Reize)?"
+        type: yesno
+      - id: kap32_reize_anmerkungen
+        text: "Hier können Sie dieses besondere Empfinden genauer beschreiben:"
+        type: textarea
+      - id: kap32_kategorisieren
+        text: "Neigen Sie dazu, Gegenstände zu kategorisieren, zu sortieren oder nach bestimmten Merkmalen aufzureihen (oder haben Sie ein solches Verhalten in der Kindheit/Jugend gezeigt)?"
+        type: yesno
+      - id: kap32_kategorisieren_anmerkungen
+        text: "Hier können Sie genauer beschreiben, ob/inwiefern Sie dazu neigen (oder in der Kindheit/Jugend dazu geneigt haben), Gegenstände zu kategorisieren, zu sortieren oder nach bestimmten Merkmalen aufzureihen:"
+        type: textarea
+      - id: kap32_stimming
+        text: "Neigen Sie dazu, Stimmingverhalten (kurz: Stimming) zu zeigen (z. B. mit den Händen flattern oder springen, wenn Sie sich sehr freuen; vor- und zurückwippen; Gegenstände in/mit den Händen kneten; bei Stress Geräusche mit den Lippen machen...)?"
+        type: yesno
+      - id: kap32_stimming_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie zu Stimming neigen:"
+        type: textarea
+      - id: kap32_stimming_unterdruecken
+        text: "Neigen Sie dazu, solches Stimming in sozialen Situationen zu unterdrücken?"
+        type: yesno
+      - id: kap32_stimming_unterdruecken_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie Stimming unterdrücken und wie es Ihnen dann geht:"
+        type: textarea
+      - id: kap32_echolalie
+        text: "Neigen Sie zu Echolalie (dies bedeutet: Sprechen Sie z. B. etwas, das Sie irgendwo gehört haben, einfach nach, a) ohne dass Sie den Sinn des Gesagten vollständig verstehen oder b) ohne dass das dann von Ihnen Gesagte zu der aktuellen Situation passt)?"
+        type: yesno
+      - id: kap32_echolalie_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Echolalie in Ihrem Leben eine Rolle spielt:"
+        type: textarea
+      - id: kap32_woerter_wiederholen
+        text: "Setzen sich manchmal Wörter, Sätze oder Satzteile in Ihren Gedanken fest und wiederholen sich wieder und wieder?"
+        type: yesno
+      - id: kap32_woerter_wiederholen_anmerkungen
+        text: "Hier können Sie z. B. beschreiben, ob/inwiefern dies bei Ihnen vorkommt:"
+        type: textarea
+      - id: kap32_routinen
+        text: "Neigen Sie zu Routinen und Ritualen (z. B. führen Sie bestimmte Handlungen immer wieder in der gleichen Art und Weise durch)?"
+        type: yesno
+      - id: kap32_routinen_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie zu Routinen und Ritualen neigen:"
+        type: textarea
+      - id: kap32_spezialinteressen
+        text: "Haben Sie spezielle Interessen, mit denen Sie sich ständig (z. B. täglich mehrere Stunden) beschäftigen (z. B. Informationen zu bestimmten Themen sammeln, Mangas malen, Tierdokus schauen, etc.)?"
+        type: yesno
+      - id: kap32_spezialinteressen_anmerkungen
+        text: "Hier können Sie beschreiben, inwiefern Sie Spezialinteressen haben:"
+        type: textarea
+      - id: kap32_veraenderungen
+        text: "Haben Sie Probleme mit plötzlichen Veränderungen?"
+        type: yesno
+      - id: kap32_veraenderungen_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie Probleme mit plötzlichen Veränderungen haben:"
+        type: textarea
+      - id: kap32_gegenstand_verbindung
+        text: "Haben Sie zu irgendeinem Gegenstand eine ganz besonders enge Verbindung? (z. B. ein Lieblingskuscheltier, das Sie immer und überallhin mitnehmen)"
+        type: yesno
+      - id: kap32_gegenstand_anmerkungen
+        text: "Hier können Sie beschreiben, um welchen Gegenstand es sich handelt und was er für Sie bedeutet:"
+        type: textarea
+      - id: kap32_spielzeug_sortieren
+        text: "Haben Sie als Kind Spielzeug eher nach Größen und Farben sortiert, als auf „klassische Weise\" mit diesem zu spielen? (z. B. lassen Kinder klassischerweise Autos um die Wette fahren oder Spielzeuge gegeneinander kämpfen)"
+        type: yesno
+      - id: kap32_spielzeug_anmerkungen
+        text: "Hier können Sie beschreiben, wie Sie mit Spielzeug umgegangen sind:"
+        type: textarea
+      - id: kap32_rollenspiele
+        text: "Hatten Sie als Kind Probleme, Rollenspiele zu spielen (z. B. Vater-Mutter-Kind) bzw. haben Sie solche Spiele gar nicht gespielt? Alternative / Ergänzung: Haben Sie als Kind bei Rollenspielen immer nur Rollen gespielt, die Sie eigentlich kannten (z. B. bei Vater-Mutter-Kind das Kind gespielt, weil Sie dann einfach sich selbst spielen konnten)?"
+        type: yesno
+      - id: kap32_rollenspiele_anmerkungen
+        text: "Hier können Sie Ihre Erfahrungen mit Rollenspielen beschreiben:"
+        type: textarea
+      - id: kap32_plaene_ausfallen
+        text: "Geht es Ihnen schlecht, wenn geplante Termine (z. B. auf der Arbeit oder Treffen mit Freund:innen) spontan ausfallen oder sich verschieben?"
+        type: yesno
+      - id: kap32_plaene_ausfallen_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie damit Schwierigkeiten haben:"
+        type: textarea
+
+  - title: "Kapitel 4: Weitere Auffälligkeiten mit Bezug zu Autismus"
+    description: "In diesem Kapitel geht es um weitere Auffälligkeiten und Besonderheiten, die von der Wissenschaft regelmäßig mit Autismus in Verbindung gebracht werden. Die Auffälligkeiten, die in diesem Kapitel thematisiert werden, stellen überwiegend keine direkten Diagnosekriterien für Autismus dar. Dennoch können Notizen zu diesen Thematiken helfen, zentrale Informationen für einen Diagnostikprozess bereitzustellen. Außerdem können Sie auf diese Weise über sich und Ihr Verhalten vertiefend reflektieren und Ihren Unterstützungsbedarf womöglich besser einschätzen."
+    questions:
+      - id: kap4_reizfilter
+        text: "Haben Sie das Gefühl, dass alle Reize (z. B. Lichter, Geräusche, Gerüche) aus der Umwelt ungefiltert auf Sie einwirken (= Haben Sie eine Reizfilterstörung)?"
+        type: yesno
+      - id: kap4_reizfilter_anmerkungen
+        text: "Hier können Sie Anmerkungen zu der von Ihnen wahrgenommenen Reizfilterstörung notieren:"
+        type: textarea
+      - id: kap4_overload
+        text: "Bekommen Sie Kopfschmerzen, fangen Sie an zu zittern o. Ä., wenn zu viele Reize auf Sie einwirken und/oder diese Reize zu intensiv sind? (= Bekommen Sie in solchen Situationen einen Overload?)"
+        type: yesno
+      - id: kap4_overload_anmerkungen
+        text: "Hier können Sie Anmerkungen zu Ihrem Erleben von Overloads notieren:"
+        type: textarea
+      - id: kap4_meltdown
+        text: "Kann es passieren, dass Sie 1) aggressiv werden (verbal oder körperlich), 2) weglaufen oder 3) erstarren, wenn zu viele Reize auf Sie einwirken und/oder diese Reize zu intensiv sind? (= Bekommen Sie in solchen Situationen einen Meltdown?)"
+        type: yesno
+      - id: kap4_meltdown_anmerkungen
+        text: "Hier können Sie Anmerkungen zu Ihrem Erleben von Meltdowns notieren:"
+        type: textarea
+      - id: kap4_shutdown
+        text: "Kann es passieren, 1) dass Sie nicht mehr sprechen können, 2) dass Sie sich (wippend) in Embryonalstellung zusammenbrechen oder 3) dass Sie sich (wippend) in Embryonalstellung begeben, wenn zu viele Reize auf Sie einwirken und/oder diese Reize zu intensiv sind? (= Haben Sie in solchen Situationen einen Shutdown?)"
+        type: yesno
+      - id: kap4_shutdown_anmerkungen
+        text: "Hier können Sie Anmerkungen zu Ihrem Erleben von Shutdowns notieren:"
+        type: textarea
+      - id: kap4_fahrrad_schwimmen
+        text: "Haben Sie besonders lange gebraucht, um Fahrradfahren/Schwimmen zu lernen oder beherrschen Sie bis heute noch nicht das Fahrradfahren/Schwimmen?"
+        type: yesno
+      - id: kap4_fahrrad_schwimmen_anmerkungen
+        text: "Hier können Sie weitere Anmerkungen zu Ihren Erfahrungen mit Fahrradfahren/Schwimmen oder ähnlichen Aktivitäten notieren:"
+        type: textarea
+      - id: kap4_ungeschicklichkeit
+        text: "Wird Ihnen häufig gesagt, dass Sie sehr ungeschickt sind oder fällt Ihnen selbst auf, dass Sie zur Ungeschicklichkeit neigen?"
+        type: yesno
+      - id: kap4_ungeschicklichkeit_anmerkungen
+        text: "Hier können Sie weitere Anmerkungen zum Thema Ungeschicklichkeit notieren:"
+        type: textarea
+      - id: kap4_leistungsbereiche
+        text: "Sind Sie in einigen Leistungsbereichen besonders gut und in anderen Leistungsbereichen hingegen sehr schlecht (z. B.: Sie können sehr gut Mangas zeichnen, können sich die Schuhe aber nicht selbständig zubinden)?"
+        type: yesno
+      - id: kap4_leistungsbereiche_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie in einigen Leistungsbereichen besonders gut und in anderen Leistungsbereichen sehr schlecht sind:"
+        type: textarea
+      - id: kap4_neue_situationen
+        text: "Fällt es Ihnen schwer, sich in neuen (sozialen) Situationen zurechtzufinden (z. B., wenn Sie auf neue Personen treffen oder in ein Krankenhaus müssen, in dem Sie noch nie waren, oder erstmalig zu einem bestimmten Amt müssen)?"
+        type: yesno
+      - id: kap4_neue_situationen_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern es Ihnen Schwierigkeiten bereitet, sich in neuen (sozialen) Situationen zurechtzufinden:"
+        type: textarea
+      - id: kap4_soziale_interaktion_muede
+        text: "Sind soziale Interaktionen für Sie sehr anstrengend (auch wenn sie teilweise schön sein können)? Fühlen Sie sich nach sozialer Interaktion oft müde oder niedergeschlagen?"
+        type: yesno
+      - id: kap4_soziale_interaktion_muede_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie soziale Interaktionen als sehr anstrengend erleben:"
+        type: textarea
+      - id: kap4_nahrungsmittel
+        text: "Sind Sie bei der Auswahl dessen, was Sie essen, sehr wählerisch (muss das Essen z. B. immer gleich aussehen / immer exakt identisch zubereitet sein oder essen Sie nur wenige, ausgewählte Nahrungsmittel)?"
+        type: yesno
+      - id: kap4_nahrungsmittel_anmerkungen
+        text: "Hier können Sie weitere Anmerkungen dazu aufschreiben, ob/inwiefern Sie bei der Auswahl Ihrer Nahrungsmittel sehr wählerisch sind:"
+        type: textarea
+      - id: kap4_schnell_langsam_reden
+        text: "Neigen Sie dazu, besonders schnell oder besonders langsam zu reden?"
+        type: yesno
+      - id: kap4_schnell_langsam_reden_anmerkungen
+        text: "Hier können Sie Anmerkungen dazu aufschreiben, ob/inwiefern Sie dazu neigen, besonders schnell oder besonders langsam zu reden:"
+        type: textarea
+      - id: kap4_details_fokussieren
+        text: "Neigen Sie dazu, sich sehr auf Details zu fokussieren (und dabei dann das „große Ganze\" aus dem Blick zu verlieren)?"
+        type: yesno
+      - id: kap4_details_anmerkungen
+        text: "Hier können Sie weitere Anmerkungen dazu aufschreiben, ob/inwiefern Sie dazu neigen, sich sehr auf Details zu fokussieren:"
+        type: textarea
+      - id: kap4_musik_dauerschleife
+        text: "Neigen Sie dazu, z. B. einzelne Musikstücke (oder Musikalben) immer wieder in Dauerschleife zu hören oder einzelne Filme/Videos immer wieder anzusehen und nimmt dies ein Ausmaß an, das von der Norm deutlich abweicht? (ggf. auch Ausschnitte von Musikstücken oder Filmen/Videos)"
+        type: yesno
+      - id: kap4_musik_dauerschleife_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie dazu neigen, sich Musik immer wieder anzuhören oder Videos immer wieder anzusehen:"
+        type: textarea
+      - id: kap4_erinnerung_kindheit
+        text: "Fällt es Ihnen schwer, sich an Erlebnisse aus Ihrer Kindheit zu erinnern?"
+        type: yesno
+      - id: kap4_erinnerung_morgens
+        text: "Fällt es Ihnen schwer, sich am Mittag eines Tages daran zu erinnern, was morgens passiert ist?"
+        type: yesno
+      - id: kap4_erinnerung_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie Erinnerungslücken erleben:"
+        type: textarea
+      - id: kap4_alien
+        text: "Hatten Sie in der Kindheit/Jugend das Gefühl, „auf einem falschen Planeten zu leben\" oder haben Sie sich des Öfteren „wie ein Alien in einer fremden Welt\" gefühlt?"
+        type: yesno
+      - id: kap4_alien_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie so empfunden haben:"
+        type: textarea
+      - id: kap4_geschlecht_identifizieren
+        text: "Identifizieren Sie sich (vollständig) mit dem Geschlecht, das Ihnen bei der Geburt zugewiesen wurde?"
+        type: yesno
+      - id: kap4_geschlecht_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie sich mit dem Ihnen zugewiesenen Geschlecht identifizieren:"
+        type: textarea
+      - id: kap4_rituale_hinterfragen
+        text: "Neigen Sie dazu, Rituale und Bräuche zu hinterfragen? (z. B. das Händeschütteln bei Begrüßungen, das familiäre Zusammensitzen an bestimmten Feiertagen, das Tragen von spezifischer Kleidung zu spezifischen Anlässen)"
+        type: yesno
+      - id: kap4_rituale_hinterfragen_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie dazu neigen, Rituale und Bräuche zu hinterfragen:"
+        type: textarea
+      - id: kap4_orientierung
+        text: "Haben Sie einen schlechten Orientierungssinn? (Verlaufen Sie sich schnell?)"
+        type: yesno
+      - id: kap4_orientierung_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie Schwierigkeiten bei der Orientierung haben:"
+        type: textarea
+      - id: kap4_tiere
+        text: "Haben Sie das Gefühl, dass Sie mit Tieren unbeschwerter interagieren können als mit Menschen?"
+        type: yesno
+      - id: kap4_tiere_anmerkungen
+        text: "Hier können Sie beschreiben, ob/inwiefern Sie ein solches Gefühl haben:"
+        type: textarea
+
+  - title: "Kapitel 5: Ergebnisse bei autismusspezifischen Testverfahren"
+    description: "Bei einer Diagnostik geht es im Kern um die systematische Erhebung von Informationen / Daten über das individuelle Verhalten und Erleben einer Person, sodass man zu einer validen Einschätzung (ggf. der Diagnose) gelangt, wobei die Methoden, die zur Erhebung der notwendigen Informationen genutzt werden, wissenschaftlichen Standards genügen müssen. Der Einsatz standardisierter Testverfahren ist in einer Diagnostik wichtig und sinnvoll, um den Verdacht auf das Vorliegen einer Störung systematisch zu evaluieren. Einige solcher Testverfahren können Sie im Internet kostenlos durchführen oder herunterladen. In diesem Kapitel werden einige solcher Testverfahren genannt und Sie haben die Möglichkeit, Ihre Punktzahlen systematisch zu notieren."
+    questions:
+      - id: kap5_raads_punktzahl
+        text: "Hier können Sie notieren, welche Punktzahl Sie beim RAADS-R erreicht haben:"
+        type: text
+      - id: kap5_raads_probleme
+        text: "Hier können Sie notieren, ob und/oder inwiefern Sie Probleme beim Ausfüllen des RAADS-R hatten:"
+        type: textarea
+      - id: kap5_aq1_punktzahl
+        text: "AQ-Test Nr. 1: Hier können Sie notieren, welche Punktzahl Sie beim AQ-Test erreicht haben:"
+        type: text
+      - id: kap5_aq1_fragenanzahl
+        text: "AQ-Test Nr. 1: Dieser AQ-Test hatte die folgende Anzahl an Fragen:"
+        type: text
+      - id: kap5_aq2_punktzahl
+        text: "AQ-Test Nr. 2: Hier können Sie notieren, welche Punktzahl Sie beim AQ-Test erreicht haben:"
+        type: text
+      - id: kap5_aq2_fragenanzahl
+        text: "AQ-Test Nr. 2: Dieser AQ-Test hatte die folgende Anzahl an Fragen:"
+        type: text
+      - id: kap5_aq3_punktzahl
+        text: "AQ-Test Nr. 3: Hier können Sie notieren, welche Punktzahl Sie beim AQ-Test erreicht haben:"
+        type: text
+      - id: kap5_aq3_fragenanzahl
+        text: "AQ-Test Nr. 3: Dieser AQ-Test hatte die folgende Anzahl an Fragen:"
+        type: text
+      - id: kap5_aq4_punktzahl
+        text: "AQ-Test Nr. 4: Hier können Sie notieren, welche Punktzahl Sie beim AQ-Test erreicht haben:"
+        type: text
+      - id: kap5_aq4_fragenanzahl
+        text: "AQ-Test Nr. 4: Dieser AQ-Test hatte die folgende Anzahl an Fragen:"
+        type: text
+      - id: kap5_aq_probleme
+        text: "Hier können Sie notieren, ob und/oder inwiefern Sie Probleme beim Ausfüllen der AQ-Tests hatten:"
+        type: textarea
+      - id: kap5_eq_punktzahl
+        text: "Hier können Sie notieren, welche Punktzahl Sie beim EQ-Test erreicht haben:"
+        type: text
+      - id: kap5_eq_probleme
+        text: "Hier können Sie notieren, ob und/oder inwiefern Sie Probleme beim Ausfüllen des EQ-Tests hatten (alternativ können Sie auch andere Anmerkungen zum EQ-Test notieren):"
+        type: textarea
+      - id: kap5_aaa_kategorie_a
+        text: "Hier können Sie notieren, welche Punktzahl Sie in Kategorie A erreicht haben (3 notwendig):"
+        type: text
+      - id: kap5_aaa_kategorie_b
+        text: "Hier können Sie notieren, welche Punktzahl Sie in Kategorie B erreicht haben (3 notwendig):"
+        type: text
+      - id: kap5_aaa_kategorie_c
+        text: "Hier können Sie notieren, welche Punktzahl Sie in Kategorie C erreicht haben (3 notwendig):"
+        type: text
+      - id: kap5_aaa_kategorie_d
+        text: "Hier können Sie notieren, welche Punktzahl Sie in Kategorie D erreicht haben (1 notwendig):"
+        type: text
+      - id: kap5_aaa_kategorie_e
+        text: "Wurden in der Kategorie E alle Kriterien erfüllt?"
+        type: yesno
+      - id: kap5_aaa_probleme
+        text: "Hier können Sie notieren, ob und/oder inwiefern Sie Probleme beim Ausfüllen des AAA hatten:"
+        type: textarea
+      - id: kap5_weitere_tests
+        text: "Hier können Sie Notizen zu weiteren Testverfahren, die Sie durchgeführt haben, festhalten. Bitte notieren Sie stets den genauen Namen des Tests und welche Punktzahlen Sie erreicht haben:"
+        type: textarea
+
+  - title: "Kapitel 6: Berichte von Angehörigen"
+    description: |
+      Eine Autismus-Spektrum-Störung beginnt in der frühsten Kindheit bzw. mit der Geburt und besteht über die gesamte Lebensdauer hinweg. Daher muss zweifelsfrei festgestellt werden, dass die vorliegende Gesamtsymptomatik nicht erst im Laufe des späteren Lebens entstanden ist, während in der frühsten Kindheit gar keine Einschränkungen/Auffälligkeiten vorhanden waren. Selbstverständlich können die Symptome in der (frühen) Kindheit schwächer oder weniger auffällig gewesen sein. Dennoch wäre es sehr verwunderlich, wenn nicht zumindest Ansätze bereits zu erkennen waren.
+
+      Falls das Störungsbild erst viel später „aus dem Nichts" entsteht, so handelt es sich sehr wahrscheinlich eher um eine andere Störung oder um mehrere Störungsbilder, die gleichzeitig bestehen und im Laufe des Lebens erworben wurden. So kann z. B. eine Kombination aus Angststörung, Posttraumatischer Belastungsstörung, Sozialphobie, Zwangsstörung und/oder Persönlichkeitsstörung in einigen Fällen wie Autismus aussehen, ohne Autismus zu sein. Obwohl diese Kombination von Störungsbildern dann wie Autismus aussehen könnte, müsste diese Störungskombination von einer Autismus-Spektrum-Störung unterschieden werden. Beim Vorliegen einer solchen oder ähnlichen Kombination verschiedener Störungsbilder wären nämlich in aller Regel andere Unterstützungs- und Therapiemaßnahmen angeraten, als es bei einer Autismus-Spektrum-Störung der Fall sein würde. Deshalb muss möglichst zweifelsfrei festgestellt werden, dass es sich tatsächlich um Autismus handelt.
+
+      Neben den Selbstbeobachtungen, Selbstbeschreibungen sowie Selbsteinschätzungen sind für eine aussagekräftige Diagnostik in aller Regel Einschätzungen von weiteren Personen notwendig. Es ist daher sinnvoll, wenn Sie die folgenden Seiten nutzen, um Fremdeinschätzungen über Ihr Verhalten einzuholen (insofern dies möglich ist). Diese Fremdeinschätzungen sollten im Optimalfall durch Angehörige (Freund:innen, Verwandte, Arbeitskolleg:innen, Lebenspartner:innen etc.) erfolgen, die Sie möglichst gut und lange kennen. Optimalerweise kennen diese Personen Sie bereits seit der (frühsten) Kindheit und können daher verlässliche Informationen zu Ihren ersten Jahren auf dieser Welt machen. Es gibt sogar Diagnostiker:innen, die nur dann eine Autismus-Diagnose vergeben, wenn Kindheitsberichte vorliegen.
+
+      Sollten keine Kontakte zu Personen aus der Kindheit (z. B. den Eltern) bestehen, so können alternativ auch Zeugnisse, Kinderfotos oder andere Beweismaterialien gesammelt werden, die Sie (als Kopie!) diesem Heft beifügen können. Häufig können auch diesen Unterlagen Hinweise auf das Vorliegen/Nicht-Vorliegen einer Autismus-Spektrum-Störung entnommen werden.
+
+      Auf den folgenden Seiten wird Ihnen Platz geboten, um von vier Personen Eindrücke über Ihr Verhalten und Ihre Auffälligkeiten zu dokumentieren. Vergessen Sie nicht, dass die jeweilige Person ihren Bericht unterschreiben sollte, um auf diese Weise zu bestätigen, dass die getroffenen Aussagen wahr sind (ein entsprechendes Feld für eine Unterschrift ist am Ende des Bogens stets vorhanden).
+
+      Selbst wenn Sie keinen Kontakt zu Personen aus Ihrer Kindheit oder Jugend haben sollten, so können Berichte von nahen Angehörigen oder Personen, die Sie schon seit mehreren Jahren begleiten / kennen, für eine Diagnostik sehr wertvoll sein. Sie sollten diese Personen dann darum bitten, diese Seiten mit Ihnen zusammen auszufüllen.
+
+      Gerne können Angehörige auch die in Kapitel 5 dargestellten Testverfahren ausfüllen und Ihre Auffälligkeiten auf diese Weise „von außen" bewerten. So würden dann einmal die Testergebnisse aus Ihrer Perspektive und die Testergebnisse aus der Perspektive einer anderen Person über Sie vorliegen. Wenn Sie selbst und andere Personen zu den gleichen oder zumindest zu ähnlichen Ergebnissen kommen, so spricht dies für eine gewisse Validität der Testergebnisse.
+    questions: []
+
+  - title: "Kapitel 6.1: Angehörigenbericht von Person 1"
+    questions:
+      - id: kap6_p1_name
+        text: "Name der Person, die berichtet (Vor- und Nachname):"
+        type: text
+      - id: kap6_p1_verhaeltnis
+        text: "Diese Person steht zu Ihnen im folgenden Verhältnis (z. B. Freund, Lebensgefährtin, Elternteil etc.):"
+        type: text
+      - id: kap6_p1_kennt_seit
+        text: "Diese Person kennt Sie seit so vielen Jahren / seit diesem Jahr:"
+        type: text
+      - id: kap6_p1_beschreibung
+        text: "Konkrete Beschreibung Ihrer Auffälligkeiten und Besonderheiten:"
+        type: textarea
+      - id: kap6_p1_bestaetigung
+        text: "Hiermit bestätige ich, dass diese Angaben korrekt sind. (Ort, Datum, Unterschrift):"
+        type: text
+
+  - title: "Kapitel 6.2: Angehörigenbericht von Person 2"
+    questions:
+      - id: kap6_p2_name
+        text: "Name der Person, die berichtet (Vor- und Nachname):"
+        type: text
+      - id: kap6_p2_verhaeltnis
+        text: "Diese Person steht zu Ihnen im folgenden Verhältnis (z. B. Freund, Lebensgefährtin, Elternteil etc.):"
+        type: text
+      - id: kap6_p2_kennt_seit
+        text: "Diese Person kennt Sie seit so vielen Jahren / seit diesem Jahr:"
+        type: text
+      - id: kap6_p2_beschreibung
+        text: "Konkrete Beschreibung Ihrer Auffälligkeiten und Besonderheiten:"
+        type: textarea
+      - id: kap6_p2_bestaetigung
+        text: "Hiermit bestätige ich, dass diese Angaben korrekt sind. (Ort, Datum, Unterschrift):"
+        type: text
+
+  - title: "Kapitel 6.3: Angehörigenbericht von Person 3"
+    questions:
+      - id: kap6_p3_name
+        text: "Name der Person, die berichtet (Vor- und Nachname):"
+        type: text
+      - id: kap6_p3_verhaeltnis
+        text: "Diese Person steht zu Ihnen im folgenden Verhältnis (z. B. Freund, Lebensgefährtin, Elternteil etc.):"
+        type: text
+      - id: kap6_p3_kennt_seit
+        text: "Diese Person kennt Sie seit so vielen Jahren / seit diesem Jahr:"
+        type: text
+      - id: kap6_p3_beschreibung
+        text: "Konkrete Beschreibung Ihrer Auffälligkeiten und Besonderheiten:"
+        type: textarea
+      - id: kap6_p3_bestaetigung
+        text: "Hiermit bestätige ich, dass diese Angaben korrekt sind. (Ort, Datum, Unterschrift):"
+        type: text
+
+  - title: "Kapitel 6.4: Angehörigenbericht von Person 4"
+    questions:
+      - id: kap6_p4_name
+        text: "Name der Person, die berichtet (Vor- und Nachname):"
+        type: text
+      - id: kap6_p4_verhaeltnis
+        text: "Diese Person steht zu Ihnen im folgenden Verhältnis (z. B. Freund, Lebensgefährtin, Elternteil etc.):"
+        type: text
+      - id: kap6_p4_kennt_seit
+        text: "Diese Person kennt Sie seit so vielen Jahren / seit diesem Jahr:"
+        type: text
+      - id: kap6_p4_beschreibung
+        text: "Konkrete Beschreibung Ihrer Auffälligkeiten und Besonderheiten:"
+        type: textarea
+      - id: kap6_p4_bestaetigung
+        text: "Hiermit bestätige ich, dass diese Angaben korrekt sind. (Ort, Datum, Unterschrift):"
+        type: text
