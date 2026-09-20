@@ -15,7 +15,10 @@ h2 { border-bottom: 2px solid #333; padding-bottom: 5px; margin-top: 2em; }
 .question textarea { height: 120px; resize: vertical; }
 .choice-group { display: flex; gap: 1.5em; flex-wrap: wrap; margin-top: 5px; }
 .choice-group label { font-weight: normal; display: flex; align-items: center; gap: 5px; }
-.clear-choice { background: none; border: none; color: #06c; cursor: pointer; font: inherit; font-size: 0.85em; text-decoration: underline; padding: 0; margin-top: 4px; }
+.clear-choice { background: none; border: none; color: #aaa; cursor: pointer; font: inherit; line-height: 1; padding: 0 4px; align-self: center; visibility: hidden; }
+.clear-choice:hover { color: #b00; background: none; }
+.clear-choice:focus-visible { visibility: visible; }
+.choice-group:has(input:checked) .clear-choice { visibility: visible; }
 button { display: block; margin: 2em auto; padding: 12px 30px; font-size: 1.1em; background: #2a6; color: white; border: none; border-radius: 5px; cursor: pointer; }
 button:hover { background: #185; }
 .saved-notice { text-align: center; color: #2a6; opacity: 0; transition: opacity 0.3s; }
@@ -185,8 +188,8 @@ function choiceGroup(name, options) {
   const opts = options.map(o =>
     `<label><input type="radio" name="${nameEsc}" value="${escapeHtml(o)}"> ${escapeHtml(o)}</label>`
   ).join('');
-  return `<div class="choice-group">${opts}</div>` +
-    `<button type="button" class="clear-choice" data-for="${nameEsc}">Auswahl löschen</button>`;
+  const clear = `<button type="button" class="clear-choice" data-for="${nameEsc}" title="Auswahl löschen" aria-label="Auswahl löschen">✕</button>`;
+  return `<div class="choice-group">${opts}${clear}</div>`;
 }
 
 // --- answer persistence -----------------------------------------------------
