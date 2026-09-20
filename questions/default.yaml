@@ -1,7 +1,7 @@
 title: "Beispiel-Fragebogen"
 sections:
   - title: "Willkommen"
-    description: "Dies ist ein Beispiel-Fragebogen. Öffne einen anderen Fragebogen über <code>?q=name</code> in der URL."
+    description: 'Dies ist ein Beispiel-Fragebogen. Öffne einen anderen Fragebogen über <b>?q=name</b> in der URL. Verfügbar: <a href="?q=adhs-workbook">ADHS Workbook</a> und <a href="?q=autismus-workbook">Autismus Workbook</a>.'
     questions:
       - id: name
         text: "Wie heißt du?"

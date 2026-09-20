@@ -41,6 +41,8 @@ in der Web-Ansicht **und** im PDF umgesetzt:
 - `<u>…</u>` – unterstrichen
 - `<b>…</b>` / `<strong>…</strong>` – fett
 - `<i>…</i>` / `<em>…</em>` – kursiv
+- `<a href="?q=name">…</a>` – Link zu einem anderen Fragebogen (nur relative
+  `?q=…`- oder `#…`-Links sind erlaubt)
 
 Alle anderen HTML-Tags werden aus Sicherheitsgründen als reiner Text dargestellt.
 

@@ -61,30 +61,52 @@ const ALLOWED_TAGS = {
 };
 const ALLOWED_RE = new RegExp('&lt;(/?(?:' + Object.keys(ALLOWED_TAGS).join('|') + '))&gt;', 'g');
 
-// Escape everything, then re-enable only the allowlisted inline tags.
+// Only allow safe relative links: a questionnaire link (?q=<stem>) or an
+// in-page anchor (#…). Anything with a scheme (javascript:, http:, …) or
+// quotes is rejected, returning null so the link is dropped (text is kept).
+function safeHref(h) {
+  const href = String(h == null ? '' : h);
+  return /^\?q=[a-zA-Z0-9_-]+$/.test(href) || /^#[a-zA-Z0-9_-]*$/.test(href) ? href : null;
+}
+
+// Escape everything, then re-enable only the allowlisted inline tags and
+// safe <a href="…"> links.
 function formatInline(s) {
-  return escapeHtml(s).replace(ALLOWED_RE, '<$1>');
+  let out = escapeHtml(s).replace(ALLOWED_RE, '<$1>');
+  // Re-enable safe anchors: match the escaped form produced by escapeHtml.
+  out = out.replace(/&lt;a href=&quot;([^&]*)&quot;&gt;([\s\S]*?)&lt;\/a&gt;/g, (full, href, text) => {
+    const safe = safeHref(href);
+    return safe ? `<a href="${safe}">${text}</a>` : text;
+  });
+  return out;
 }
 
 // Parse allowlisted inline tags into pdfmake text runs; other tags stay literal.
 function inlineToPdf(s) {
   const str = String(s == null ? '' : s);
-  const re = /<(\/?)([a-zA-Z]+)>/g;
+  const re = /<(\/?)([a-zA-Z]+)(?:\s+href="([^"]*)")?>/g;
   const runs = [], stack = [];
   let last = 0, m;
   const push = text => {
     if (!text) return;
     const run = { text };
-    for (const t of stack) Object.assign(run, ALLOWED_TAGS[t]);
+    for (const t of stack) {
+      if (t.tag === 'a') {
+        const safe = safeHref(t.href);
+        if (safe) Object.assign(run, { link: safe, color: 'blue', decoration: 'underline' });
+      } else {
+        Object.assign(run, ALLOWED_TAGS[t.tag]);
+      }
+    }
     runs.push(run);
   };
   while ((m = re.exec(str)) !== null) {
     const tag = m[2].toLowerCase();
-    if (!ALLOWED_TAGS[tag]) continue;
+    if (tag !== 'a' && !ALLOWED_TAGS[tag]) continue;
     push(str.slice(last, m.index));
     last = m.index + m[0].length;
-    if (m[1]) { const i = stack.lastIndexOf(tag); if (i !== -1) stack.splice(i, 1); }
-    else stack.push(tag);
+    if (m[1]) { const i = stack.map(e => e.tag).lastIndexOf(tag); if (i !== -1) stack.splice(i, 1); }
+    else stack.push({ tag, href: m[3] });
   }
   push(str.slice(last));
   return runs.length ? runs : [{ text: str }];
