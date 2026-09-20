@@ -138,11 +138,15 @@ function clearError() {
 }
 
 // Remove stored answers for questionnaires no longer in the manifest.
+// Guarded: only prunes when the manifest is a non-empty list, so a
+// temporarily broken/empty index.json can't wipe saved answers.
 function pruneOrphanAnswers(validFiles) {
+  if (!Array.isArray(validFiles) || validFiles.length === 0) return;
   const valid = new Set(validFiles.map(f => ANSWERS_PREFIX + f));
   for (let i = localStorage.length - 1; i >= 0; i--) {
     const key = localStorage.key(i);
     if (key && key.startsWith(ANSWERS_PREFIX) && !valid.has(key)) {
+      console.warn('Entferne verwaiste Antworten:', key);
       localStorage.removeItem(key);
     }
   }
@@ -312,8 +316,12 @@ function loadAnswers() {
 }
 
 function exportPDF() {
+  if (!data || !data.sections) {
+    showError('Kein Fragebogen geladen – PDF-Export nicht möglich.');
+    return;
+  }
   const answers = JSON.parse(localStorage.getItem(storageKey()) || '{}');
-  const content = [{ text: data.title, style: 'title' }];
+  const content = [{ text: inlineToPdf(data.title || currentFile), style: 'title' }];
 
   function checkbox(checked) {
     const box = {
@@ -331,7 +339,7 @@ function exportPDF() {
     const cols = [];
     for (const o of options) {
       cols.push(checkbox(o === selected));
-      cols.push({ text: o + '   ', style: 'answer', margin: [2, 0, 10, 0] });
+      cols.push({ text: inlineToPdf(o).concat({ text: '   ' }), style: 'answer', margin: [2, 0, 10, 0] });
     }
     return { columns: cols, margin: [10, 2, 0, 5] };
   }
