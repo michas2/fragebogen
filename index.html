@@ -66,6 +66,60 @@ function escapeHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
+// Allowlist of inline formatting tags supported in question/section text.
+// Maps a tag name to its pdfmake styling for PDF export.
+const ALLOWED_TAGS = {
+  u: { decoration: 'underline' },
+  b: { bold: true },
+  strong: { bold: true },
+  i: { italics: true },
+  em: { italics: true },
+};
+
+// Escape all HTML, then re-enable only the allowlisted inline tags.
+// This keeps arbitrary/injected markup inert while supporting formatting
+// like <u>…</u> that appears in the source material.
+function formatInline(s) {
+  let out = escapeHtml(s);
+  for (const tag of Object.keys(ALLOWED_TAGS)) {
+    out = out
+      .replace(new RegExp('&lt;' + tag + '&gt;', 'g'), '<' + tag + '>')
+      .replace(new RegExp('&lt;/' + tag + '&gt;', 'g'), '</' + tag + '>');
+  }
+  return out;
+}
+
+// Parse allowlisted inline tags into pdfmake text runs.
+// Unknown tags are left as literal text (already safe).
+function inlineToPdf(s) {
+  const str = String(s == null ? '' : s);
+  const re = /<(\/?)([a-zA-Z]+)>/g;
+  const runs = [];
+  const styleStack = [];
+  let last = 0, m;
+  const push = (text) => {
+    if (!text) return;
+    const run = { text };
+    for (const st of styleStack) Object.assign(run, ALLOWED_TAGS[st]);
+    runs.push(run);
+  };
+  while ((m = re.exec(str)) !== null) {
+    const [full, closing, name] = m;
+    const tag = name.toLowerCase();
+    if (!ALLOWED_TAGS[tag]) continue; // leave unknown tags as literal text
+    push(str.slice(last, m.index));
+    last = m.index + full.length;
+    if (closing) {
+      const idx = styleStack.lastIndexOf(tag);
+      if (idx !== -1) styleStack.splice(idx, 1);
+    } else {
+      styleStack.push(tag);
+    }
+  }
+  push(str.slice(last));
+  return runs.length ? runs : [{ text: str }];
+}
+
 // Safely escape a value for use in a CSS attribute/id selector.
 function cssEscape(s) {
   return (window.CSS && CSS.escape) ? CSS.escape(String(s)) : String(s).replace(/["\\\]]/g, '\\$&');
@@ -171,8 +225,8 @@ async function loadQuestionnaire() {
   // Build markup once, then assign (avoids repeated reparsing).
   let html = '';
   for (const section of data.sections || []) {
-    html += `<h2>${escapeHtml(section.title)}</h2>`;
-    if (section.description) html += `<p class="description">${escapeHtml(section.description)}</p>`;
+    html += `<h2>${formatInline(section.title)}</h2>`;
+    if (section.description) html += `<p class="description">${formatInline(section.description)}</p>`;
     for (const q of section.questions || []) {
       html += renderQuestion(q);
     }
@@ -216,7 +270,7 @@ function renderQuestion(q) {
     if (q.type !== 'text') console.warn('Unbekannter Fragetyp "' + q.type + '" für', q.id, '– verwende Textfeld.');
     input = `<input type="text" id="${id}">`;
   }
-  return `<div class="question"><label for="${id}">${escapeHtml(q.text)}</label>${input}</div>`;
+  return `<div class="question"><label for="${id}">${formatInline(q.text)}</label>${input}</div>`;
 }
 
 function choiceGroup(name, options) {
@@ -283,10 +337,10 @@ function exportPDF() {
   }
 
   for (const section of data.sections || []) {
-    content.push({ text: section.title, style: 'h2', pageBreak: 'before' });
-    if (section.description) content.push({ text: section.description, style: 'desc' });
+    content.push({ text: inlineToPdf(section.title), style: 'h2', pageBreak: 'before' });
+    if (section.description) content.push({ text: inlineToPdf(section.description), style: 'desc' });
     for (const q of section.questions || []) {
-      const questionBlock = [{ text: q.text, style: 'question' }];
+      const questionBlock = [{ text: inlineToPdf(q.text), style: 'question' }];
       if (q.type === 'yesno') {
         questionBlock.push(optionRow(['Ja', 'Nein'], answers[q.id]));
       } else if (q.type === 'choice') {
