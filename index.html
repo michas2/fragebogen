@@ -18,9 +18,16 @@ h2 { border-bottom: 2px solid #333; padding-bottom: 5px; margin-top: 2em; }
 button { display: block; margin: 2em auto; padding: 12px 30px; font-size: 1.1em; background: #2a6; color: white; border: none; border-radius: 5px; cursor: pointer; }
 button:hover { background: #185; }
 .saved-notice { text-align: center; color: #2a6; opacity: 0; transition: opacity 0.3s; }
+.selector { text-align: center; margin-bottom: 1em; }
+.selector label { font-weight: bold; margin-right: 8px; }
+.selector select { padding: 6px 10px; font-size: 1em; border: 1px solid #999; border-radius: 3px; }
 </style>
 </head>
 <body>
+<div class="selector">
+  <label for="questionnaire">Fragebogen:</label>
+  <select id="questionnaire"></select>
+</div>
 <h1 id="title"></h1>
 <div id="form"></div>
 <button onclick="exportPDF()">PDF exportieren</button>
@@ -31,13 +38,47 @@ button:hover { background: #185; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.js"></script>
 <script>
 let data;
-const STORAGE_KEY = 'fragebogen_answers';
+
+// Available questionnaires. Add new YAML files here.
+const QUESTIONNAIRES = [
+  { file: 'questions.yaml', label: 'Autismus-Diagnostik Workbook' },
+  { file: 'questions_adhs-workbook.yaml', label: 'ADHS Workbook (Christian Kissler)' },
+];
+const LAST_KEY = 'fragebogen_last_file';
+let currentFile = QUESTIONNAIRES[0].file;
+
+// Per-questionnaire storage key so answers don't mix between files.
+function storageKey() {
+  return 'fragebogen_answers::' + currentFile;
+}
 
 async function init() {
-  const res = await fetch('questions.yaml');
+  const select = document.getElementById('questionnaire');
+  for (const q of QUESTIONNAIRES) {
+    const opt = document.createElement('option');
+    opt.value = q.file;
+    opt.textContent = q.label;
+    select.appendChild(opt);
+  }
+  const last = localStorage.getItem(LAST_KEY);
+  if (last && QUESTIONNAIRES.some(q => q.file === last)) currentFile = last;
+  select.value = currentFile;
+  select.addEventListener('change', () => {
+    currentFile = select.value;
+    localStorage.setItem(LAST_KEY, currentFile);
+    loadQuestionnaire();
+  });
+
+  await loadQuestionnaire();
+}
+
+async function loadQuestionnaire() {
+  localStorage.setItem(LAST_KEY, currentFile);
+  const res = await fetch(currentFile);
   data = jsyaml.load(await res.text());
   document.getElementById('title').textContent = data.title;
   const form = document.getElementById('form');
+  form.innerHTML = '';
   for (const section of data.sections) {
     form.innerHTML += `<h2>${section.title}</h2>`;
     if (section.description) form.innerHTML += `<p class="description">${section.description}</p>`;
@@ -46,20 +87,20 @@ async function init() {
     }
   }
   loadAnswers();
-  form.addEventListener('input', saveAnswers);
+  form.oninput = saveAnswers;
   // Allow deselecting radio buttons
-  form.addEventListener('click', e => {
+  form.onclick = e => {
     if (e.target.type === 'radio' && e.target.dataset.wasChecked === 'true') {
       e.target.checked = false;
       e.target.dataset.wasChecked = 'false';
       saveAnswers();
     }
-  });
-  form.addEventListener('mousedown', e => {
+  };
+  form.onmousedown = e => {
     if (e.target.type === 'radio') {
       e.target.dataset.wasChecked = e.target.checked ? 'true' : 'false';
     }
-  });
+  };
 }
 
 function renderQuestion(q) {
@@ -88,14 +129,14 @@ function saveAnswers() {
       answers[q.id] = document.getElementById(q.id).value;
     }
   }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+  localStorage.setItem(storageKey(), JSON.stringify(answers));
   const notice = document.getElementById('saved');
   notice.style.opacity = 1;
   setTimeout(() => notice.style.opacity = 0, 1500);
 }
 
 function loadAnswers() {
-  const answers = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  const answers = JSON.parse(localStorage.getItem(storageKey()) || '{}');
   for (const [id, val] of Object.entries(answers)) {
     const el = document.getElementById(id);
     if (el) { el.value = val; }
@@ -107,7 +148,7 @@ function loadAnswers() {
 }
 
 function exportPDF() {
-  const answers = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  const answers = JSON.parse(localStorage.getItem(storageKey()) || '{}');
   const content = [{ text: data.title, style: 'title' }];
 
   function checkbox(checked) {
