@@ -16,9 +16,17 @@ Dann http://localhost:8080 öffnen.
 
 ## Dateien
 
-- `index.html` – Fragebogen ausfüllen + PDF-Export
+- `index.html` – Fragebogen ausfüllen + PDF-Export (mit Auswahl des Fragebogens)
 - `scan.html` – Buchseiten per OCR (Tesseract.js + OpenCV.js) in YAML umwandeln
-- `questions.yaml` – Alle Fragen im YAML-Format
+- `questions/` – Verzeichnis mit allen Fragebögen im YAML-Format
+- `questions/index.json` – Liste der verfügbaren Fragebogen-Dateien
+
+## Neuen Fragebogen hinzufügen
+
+1. YAML-Datei in `questions/` ablegen.
+2. Dateinamen in `questions/index.json` eintragen.
+
+Der Titel im Auswahlmenü wird automatisch aus dem `title`-Feld der YAML gelesen.
 
 ## YAML-Struktur
 

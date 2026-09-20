@@ -39,13 +39,12 @@ button:hover { background: #185; }
 <script>
 let data;
 
-// Available questionnaires. Add new YAML files here.
-const QUESTIONNAIRES = [
-  { file: 'questions.yaml', label: 'Autismus-Diagnostik Workbook' },
-  { file: 'questions_adhs-workbook.yaml', label: 'ADHS Workbook (Christian Kissler)' },
-];
+// Questionnaires live in questions/. To add one, drop the YAML there
+// and list its filename in questions/index.json.
+const QUESTIONS_DIR = 'questions/';
+const MANIFEST = QUESTIONS_DIR + 'index.json';
 const LAST_KEY = 'fragebogen_last_file';
-let currentFile = QUESTIONNAIRES[0].file;
+let currentFile = null;
 
 // Per-questionnaire storage key so answers don't mix between files.
 function storageKey() {
@@ -54,14 +53,28 @@ function storageKey() {
 
 async function init() {
   const select = document.getElementById('questionnaire');
-  for (const q of QUESTIONNAIRES) {
+
+  // Load the manifest, then read each file's own title for the label.
+  const files = await (await fetch(MANIFEST)).json();
+  const entries = await Promise.all(files.map(async file => {
+    try {
+      const doc = jsyaml.load(await (await fetch(QUESTIONS_DIR + file)).text());
+      return { file, label: (doc && doc.title) || file };
+    } catch (e) {
+      return { file, label: file };
+    }
+  }));
+
+  for (const { file, label } of entries) {
     const opt = document.createElement('option');
-    opt.value = q.file;
-    opt.textContent = q.label;
+    opt.value = file;
+    opt.textContent = label;
     select.appendChild(opt);
   }
+
+  currentFile = entries[0] && entries[0].file;
   const last = localStorage.getItem(LAST_KEY);
-  if (last && QUESTIONNAIRES.some(q => q.file === last)) currentFile = last;
+  if (last && entries.some(e => e.file === last)) currentFile = last;
   select.value = currentFile;
   select.addEventListener('change', () => {
     currentFile = select.value;
@@ -74,7 +87,7 @@ async function init() {
 
 async function loadQuestionnaire() {
   localStorage.setItem(LAST_KEY, currentFile);
-  const res = await fetch(currentFile);
+  const res = await fetch(QUESTIONS_DIR + currentFile);
   data = jsyaml.load(await res.text());
   document.getElementById('title').textContent = data.title;
   const form = document.getElementById('form');
