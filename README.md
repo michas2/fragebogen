@@ -20,6 +20,19 @@ Dann http://localhost:8080 öffnen (bei belegtem Port einen anderen wählen).
 - `index.html` – Fragebogen ausfüllen + PDF-Export
 - `questions/` – Fragebögen im YAML-Format (`default.yaml` ist das Beispiel)
 
+## Fragebogen auswählen
+
+Der Fragebogen wird über den URL-Parameter `?q=<name>` gewählt und lädt
+`questions/<name>.yaml`. So lässt sich direkt auf einen bestimmten Fragebogen
+verlinken:
+
+```
+index.html                 → questions/default.yaml
+index.html?q=adhs-workbook → questions/adhs-workbook.yaml
+```
+
+Ohne (oder mit ungültigem) Parameter wird `default.yaml` geladen.
+
 ## Inline-Formatierung
 
 In `text`- und `description`-Feldern sind einige HTML-Tags erlaubt und werden

@@ -36,7 +36,15 @@ button:hover { background: #185; }
 const QUESTIONS_DIR = 'questions/';
 const DEFAULT_FILE = 'default';
 let data;
-let currentFile = DEFAULT_FILE;
+
+// Which questionnaire to load, chosen via ?q=<name> (default: DEFAULT_FILE).
+// A direct link like ?q=adhs-workbook opens that questionnaire. The name is
+// restricted to a safe filename stem to avoid path traversal.
+function pickFile() {
+  const q = new URLSearchParams(location.search).get('q');
+  return q && /^[a-zA-Z0-9_-]+$/.test(q) ? q : DEFAULT_FILE;
+}
+let currentFile = pickFile();
 
 // --- text safety & inline formatting ---------------------------------------
 
