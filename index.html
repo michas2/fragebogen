@@ -57,13 +57,9 @@ function storageKey() {
 }
 
 // Escape text for safe interpolation into HTML.
+const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 function escapeHtml(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => HTML_ESCAPES[c]);
 }
 
 // Allowlist of inline formatting tags supported in question/section text.
@@ -79,14 +75,9 @@ const ALLOWED_TAGS = {
 // Escape all HTML, then re-enable only the allowlisted inline tags.
 // This keeps arbitrary/injected markup inert while supporting formatting
 // like <u>…</u> that appears in the source material.
+const ALLOWED_RE = new RegExp('&lt;(/?(?:' + Object.keys(ALLOWED_TAGS).join('|') + '))&gt;', 'g');
 function formatInline(s) {
-  let out = escapeHtml(s);
-  for (const tag of Object.keys(ALLOWED_TAGS)) {
-    out = out
-      .replace(new RegExp('&lt;' + tag + '&gt;', 'g'), '<' + tag + '>')
-      .replace(new RegExp('&lt;/' + tag + '&gt;', 'g'), '</' + tag + '>');
-  }
-  return out;
+  return escapeHtml(s).replace(ALLOWED_RE, '<$1>');
 }
 
 // Parse allowlisted inline tags into pdfmake text runs.
@@ -125,16 +116,11 @@ function cssEscape(s) {
   return (window.CSS && CSS.escape) ? CSS.escape(String(s)) : String(s).replace(/["\\\]]/g, '\\$&');
 }
 
-function showError(msg) {
+// Show (msg) or hide (falsy) the error banner.
+function setError(msg) {
   const el = document.getElementById('error');
-  el.textContent = msg;
-  el.hidden = false;
-}
-
-function clearError() {
-  const el = document.getElementById('error');
-  el.hidden = true;
-  el.textContent = '';
+  el.textContent = msg || '';
+  el.hidden = !msg;
 }
 
 // Remove stored answers for questionnaires no longer in the manifest.
@@ -162,7 +148,7 @@ async function init() {
     files = await res.json();
     if (!Array.isArray(files) || files.length === 0) throw new Error('leere oder ungültige Liste');
   } catch (e) {
-    showError('Fragebogen-Liste konnte nicht geladen werden (' + MANIFEST + '): ' + e.message);
+    setError('Fragebogen-Liste konnte nicht geladen werden (' + MANIFEST + '): ' + e.message);
     return;
   }
 
@@ -201,7 +187,7 @@ async function init() {
 }
 
 async function loadQuestionnaire() {
-  clearError();
+  setError();
   localStorage.setItem(LAST_KEY, currentFile);
   const form = document.getElementById('form');
   try {
@@ -211,7 +197,7 @@ async function loadQuestionnaire() {
   } catch (e) {
     form.innerHTML = '';
     document.getElementById('title').textContent = '';
-    showError('Fragebogen konnte nicht geladen werden (' + currentFile + '): ' + e.message);
+    setError('Fragebogen konnte nicht geladen werden (' + currentFile + '): ' + e.message);
     return;
   }
 
@@ -239,24 +225,12 @@ async function loadQuestionnaire() {
 
   loadAnswers();
   form.oninput = saveAnswers;
-  // Deselect a radio by clicking the already-selected one (mouse).
+  // "Auswahl löschen" clears the radio group it belongs to.
   form.onclick = e => {
-    if (e.target.classList && e.target.classList.contains('clear-choice')) {
+    if (e.target.classList.contains('clear-choice')) {
       e.preventDefault();
-      const name = e.target.dataset.for;
-      const checked = form.querySelector(`input[name="${cssEscape(name)}"]:checked`);
+      const checked = form.querySelector(`input[name="${cssEscape(e.target.dataset.for)}"]:checked`);
       if (checked) { checked.checked = false; saveAnswers(); }
-      return;
-    }
-    if (e.target.type === 'radio' && e.target.dataset.wasChecked === 'true') {
-      e.target.checked = false;
-      e.target.dataset.wasChecked = 'false';
-      saveAnswers();
-    }
-  };
-  form.onmousedown = e => {
-    if (e.target.type === 'radio') {
-      e.target.dataset.wasChecked = e.target.checked ? 'true' : 'false';
     }
   };
 }
@@ -317,7 +291,7 @@ function loadAnswers() {
 
 function exportPDF() {
   if (!data || !data.sections) {
-    showError('Kein Fragebogen geladen – PDF-Export nicht möglich.');
+    setError('Kein Fragebogen geladen – PDF-Export nicht möglich.');
     return;
   }
   const answers = JSON.parse(localStorage.getItem(storageKey()) || '{}');
