@@ -18,6 +18,9 @@ h2 { border-bottom: 2px solid #333; padding-bottom: 5px; margin-top: 2em; }
 button { display: block; margin: 2em auto; padding: 12px 30px; font-size: 1.1em; background: #2a6; color: white; border: none; border-radius: 5px; cursor: pointer; }
 button:hover { background: #185; }
 .saved-notice { text-align: center; color: #2a6; opacity: 0; transition: opacity 0.3s; }
+.error-notice { text-align: center; color: #b00; background: #fdd; border: 1px solid #b00; border-radius: 4px; padding: 10px; }
+.clear-choice { background: none; border: none; color: #06c; cursor: pointer; font: inherit; font-size: 0.85em; padding: 0; margin: 4px 0 0 0; display: inline; text-decoration: underline; }
+.clear-choice:hover { color: #04a; background: none; }
 .selector { text-align: center; margin-bottom: 1em; }
 .selector label { font-weight: bold; margin-right: 8px; }
 .selector select { padding: 6px 10px; font-size: 1em; border: 1px solid #999; border-radius: 3px; }
@@ -28,6 +31,7 @@ button:hover { background: #185; }
   <label for="questionnaire">Fragebogen:</label>
   <select id="questionnaire"></select>
 </div>
+<p class="error-notice" id="error" role="alert" hidden></p>
 <h1 id="title"></h1>
 <div id="form"></div>
 <button onclick="exportPDF()">PDF exportieren</button>
@@ -44,24 +48,77 @@ let data;
 const QUESTIONS_DIR = 'questions/';
 const MANIFEST = QUESTIONS_DIR + 'index.json';
 const LAST_KEY = 'fragebogen_last_file';
+const ANSWERS_PREFIX = 'fragebogen_answers::';
 let currentFile = null;
 
 // Per-questionnaire storage key so answers don't mix between files.
 function storageKey() {
-  return 'fragebogen_answers::' + currentFile;
+  return ANSWERS_PREFIX + currentFile;
+}
+
+// Escape text for safe interpolation into HTML.
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Safely escape a value for use in a CSS attribute/id selector.
+function cssEscape(s) {
+  return (window.CSS && CSS.escape) ? CSS.escape(String(s)) : String(s).replace(/["\\\]]/g, '\\$&');
+}
+
+function showError(msg) {
+  const el = document.getElementById('error');
+  el.textContent = msg;
+  el.hidden = false;
+}
+
+function clearError() {
+  const el = document.getElementById('error');
+  el.hidden = true;
+  el.textContent = '';
+}
+
+// Remove stored answers for questionnaires no longer in the manifest.
+function pruneOrphanAnswers(validFiles) {
+  const valid = new Set(validFiles.map(f => ANSWERS_PREFIX + f));
+  for (let i = localStorage.length - 1; i >= 0; i--) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith(ANSWERS_PREFIX) && !valid.has(key)) {
+      localStorage.removeItem(key);
+    }
+  }
 }
 
 async function init() {
   const select = document.getElementById('questionnaire');
 
+  let files;
+  try {
+    const res = await fetch(MANIFEST);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    files = await res.json();
+    if (!Array.isArray(files) || files.length === 0) throw new Error('leere oder ungültige Liste');
+  } catch (e) {
+    showError('Fragebogen-Liste konnte nicht geladen werden (' + MANIFEST + '): ' + e.message);
+    return;
+  }
+
+  pruneOrphanAnswers(files);
+
   // Load the manifest, then read each file's own title for the label.
-  const files = await (await fetch(MANIFEST)).json();
   const entries = await Promise.all(files.map(async file => {
     try {
-      const doc = jsyaml.load(await (await fetch(QUESTIONS_DIR + file)).text());
+      const res = await fetch(QUESTIONS_DIR + file);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const doc = jsyaml.load(await res.text());
       return { file, label: (doc && doc.title) || file };
     } catch (e) {
-      return { file, label: file };
+      return { file, label: file + ' (Fehler beim Laden)' };
     }
   }));
 
@@ -86,23 +143,53 @@ async function init() {
 }
 
 async function loadQuestionnaire() {
+  clearError();
   localStorage.setItem(LAST_KEY, currentFile);
-  const res = await fetch(QUESTIONS_DIR + currentFile);
-  data = jsyaml.load(await res.text());
-  document.getElementById('title').textContent = data.title;
   const form = document.getElementById('form');
-  form.innerHTML = '';
-  for (const section of data.sections) {
-    form.innerHTML += `<h2>${section.title}</h2>`;
-    if (section.description) form.innerHTML += `<p class="description">${section.description}</p>`;
-    for (const q of section.questions) {
-      form.innerHTML += renderQuestion(q);
+  try {
+    const res = await fetch(QUESTIONS_DIR + currentFile);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    data = jsyaml.load(await res.text());
+  } catch (e) {
+    form.innerHTML = '';
+    document.getElementById('title').textContent = '';
+    showError('Fragebogen konnte nicht geladen werden (' + currentFile + '): ' + e.message);
+    return;
+  }
+
+  document.getElementById('title').textContent = data.title || currentFile;
+
+  // Warn about duplicate ids (they would cross-wire answers).
+  const seen = new Set();
+  for (const s of data.sections || []) {
+    for (const q of s.questions || []) {
+      if (seen.has(q.id)) console.warn('Doppelte Frage-ID:', q.id);
+      seen.add(q.id);
     }
   }
+
+  // Build markup once, then assign (avoids repeated reparsing).
+  let html = '';
+  for (const section of data.sections || []) {
+    html += `<h2>${escapeHtml(section.title)}</h2>`;
+    if (section.description) html += `<p class="description">${escapeHtml(section.description)}</p>`;
+    for (const q of section.questions || []) {
+      html += renderQuestion(q);
+    }
+  }
+  form.innerHTML = html;
+
   loadAnswers();
   form.oninput = saveAnswers;
-  // Allow deselecting radio buttons
+  // Deselect a radio by clicking the already-selected one (mouse).
   form.onclick = e => {
+    if (e.target.classList && e.target.classList.contains('clear-choice')) {
+      e.preventDefault();
+      const name = e.target.dataset.for;
+      const checked = form.querySelector(`input[name="${cssEscape(name)}"]:checked`);
+      if (checked) { checked.checked = false; saveAnswers(); }
+      return;
+    }
     if (e.target.type === 'radio' && e.target.dataset.wasChecked === 'true') {
       e.target.checked = false;
       e.target.dataset.wasChecked = 'false';
@@ -117,29 +204,39 @@ async function loadQuestionnaire() {
 }
 
 function renderQuestion(q) {
+  const id = escapeHtml(q.id);
   let input;
-  if (q.type === 'text') {
-    input = `<input type="text" id="${q.id}">`;
-  } else if (q.type === 'textarea') {
-    input = `<textarea id="${q.id}"></textarea>`;
+  if (q.type === 'textarea') {
+    input = `<textarea id="${id}"></textarea>`;
   } else if (q.type === 'yesno') {
-    input = `<div class="choice-group"><label><input type="radio" name="${q.id}" value="Ja"> Ja</label><label><input type="radio" name="${q.id}" value="Nein"> Nein</label></div>`;
+    input = choiceGroup(q.id, ['Ja', 'Nein']);
   } else if (q.type === 'choice') {
-    input = `<div class="choice-group">${q.options.map(o =>
-      `<label><input type="radio" name="${q.id}" value="${o}"> ${o}</label>`
-    ).join('')}</div>`;
+    input = choiceGroup(q.id, q.options || []);
+  } else {
+    if (q.type !== 'text') console.warn('Unbekannter Fragetyp "' + q.type + '" für', q.id, '– verwende Textfeld.');
+    input = `<input type="text" id="${id}">`;
   }
-  return `<div class="question"><label for="${q.id}">${q.text}</label>${input}</div>`;
+  return `<div class="question"><label for="${id}">${escapeHtml(q.text)}</label>${input}</div>`;
+}
+
+function choiceGroup(name, options) {
+  const nameEsc = escapeHtml(name);
+  const opts = options.map(o =>
+    `<label><input type="radio" name="${nameEsc}" value="${escapeHtml(o)}"> ${escapeHtml(o)}</label>`
+  ).join('');
+  return `<div class="choice-group">${opts}</div>` +
+    `<button type="button" class="clear-choice" data-for="${nameEsc}">Auswahl löschen</button>`;
 }
 
 function saveAnswers() {
   const answers = {};
-  for (const s of data.sections) for (const q of s.questions) {
+  for (const s of data.sections || []) for (const q of s.questions || []) {
     if (q.type === 'choice' || q.type === 'yesno') {
-      const checked = document.querySelector(`input[name="${q.id}"]:checked`);
+      const checked = document.querySelector(`input[name="${cssEscape(q.id)}"]:checked`);
       answers[q.id] = checked ? checked.value : '';
     } else {
-      answers[q.id] = document.getElementById(q.id).value;
+      const el = document.getElementById(q.id);
+      answers[q.id] = el ? el.value : '';
     }
   }
   localStorage.setItem(storageKey(), JSON.stringify(answers));
@@ -153,8 +250,8 @@ function loadAnswers() {
   for (const [id, val] of Object.entries(answers)) {
     const el = document.getElementById(id);
     if (el) { el.value = val; }
-    else {
-      const radio = document.querySelector(`input[name="${id}"][value="${val}"]`);
+    else if (val) {
+      const radio = document.querySelector(`input[name="${cssEscape(id)}"][value="${cssEscape(val)}"]`);
       if (radio) radio.checked = true;
     }
   }
@@ -185,21 +282,22 @@ function exportPDF() {
     return { columns: cols, margin: [10, 2, 0, 5] };
   }
 
-  for (const section of data.sections) {
+  for (const section of data.sections || []) {
     content.push({ text: section.title, style: 'h2', pageBreak: 'before' });
     if (section.description) content.push({ text: section.description, style: 'desc' });
-    for (const q of section.questions) {
+    for (const q of section.questions || []) {
       const questionBlock = [{ text: q.text, style: 'question' }];
       if (q.type === 'yesno') {
         questionBlock.push(optionRow(['Ja', 'Nein'], answers[q.id]));
       } else if (q.type === 'choice') {
-        questionBlock.push(optionRow(q.options, answers[q.id]));
+        questionBlock.push(optionRow(q.options || [], answers[q.id]));
       } else {
         questionBlock.push({ text: answers[q.id] || '—', style: 'answer' });
       }
       content.push({ unbreakable: true, stack: questionBlock });
     }
   }
+  const pdfName = (currentFile || 'fragebogen').replace(/\.ya?ml$/i, '') + '.pdf';
   pdfMake.createPdf({
     content,
     styles: {
@@ -209,7 +307,7 @@ function exportPDF() {
       question: { fontSize: 11, bold: true, margin: [0, 8, 0, 2] },
       answer: { fontSize: 11, margin: [10, 0, 0, 5] }
     }
-  }).download('fragebogen.pdf');
+  }).download(pdfName);
 }
 
 init();
