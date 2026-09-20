@@ -94,12 +94,9 @@ function inlineToPdf(s) {
     if (!text) return;
     const run = { text };
     for (const t of stack) {
-      if (t.tag === 'a') {
-        const safe = safeHref(t.href);
-        if (safe) Object.assign(run, { link: safe, color: 'blue', decoration: 'underline' });
-      } else {
-        Object.assign(run, ALLOWED_TAGS[t.tag]);
-      }
+      // Links are dropped in the PDF: a relative ?q=… link has no meaning
+      // outside the web app, so only the link text is kept.
+      if (t.tag !== 'a') Object.assign(run, ALLOWED_TAGS[t.tag]);
     }
     runs.push(run);
   };
