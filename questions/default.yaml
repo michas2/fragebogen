@@ -1,0 +1,21 @@
+title: "Beispiel-Fragebogen"
+sections:
+  - title: "Willkommen"
+    description: "Dies ist ein Beispiel-Fragebogen. Öffne einen anderen Fragebogen über <code>?q=name</code> in der URL."
+    questions:
+      - id: name
+        text: "Wie heißt du?"
+        type: text
+      - id: mag_yaml
+        text: "Magst du <b>YAML</b>?"
+        type: yesno
+      - id: lieblingsfarbe
+        text: "Was ist deine Lieblingsfarbe?"
+        type: choice
+        options:
+          - "Rot"
+          - "Grün"
+          - "Blau"
+      - id: anmerkungen
+        text: "Weitere Anmerkungen (<u>optional</u>):"
+        type: textarea

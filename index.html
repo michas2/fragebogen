@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fragebogen</title>
+<style>
+body { font-family: Georgia, serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+h1 { text-align: center; }
+h2 { border-bottom: 2px solid #333; padding-bottom: 5px; margin-top: 2em; }
+.description { color: #555; font-style: italic; margin-bottom: 1.5em; }
+.question { margin-bottom: 1.5em; }
+.question label { display: block; font-weight: bold; margin-bottom: 5px; }
+.question input[type="text"], .question textarea { width: 100%; padding: 8px; font-size: 1em; border: 1px solid #999; border-radius: 3px; box-sizing: border-box; }
+.question textarea { height: 120px; resize: vertical; }
+.choice-group { display: flex; gap: 1.5em; flex-wrap: wrap; margin-top: 5px; }
+.choice-group label { font-weight: normal; display: flex; align-items: center; gap: 5px; }
+.clear-choice { background: none; border: none; color: #06c; cursor: pointer; font: inherit; font-size: 0.85em; text-decoration: underline; padding: 0; margin-top: 4px; }
+button { display: block; margin: 2em auto; padding: 12px 30px; font-size: 1.1em; background: #2a6; color: white; border: none; border-radius: 5px; cursor: pointer; }
+button:hover { background: #185; }
+.saved-notice { text-align: center; color: #2a6; opacity: 0; transition: opacity 0.3s; }
+.error-notice { text-align: center; color: #b00; background: #fdd; border: 1px solid #b00; border-radius: 4px; padding: 10px; }
+</style>
+</head>
+<body>
+<p class="error-notice" id="error" role="alert" hidden></p>
+<h1 id="title"></h1>
+<div id="form"></div>
+<button onclick="exportPDF()">PDF exportieren</button>
+<p class="saved-notice" id="saved" role="status">✓ Gespeichert</p>
+
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.js"></script>
+<script>
+const QUESTIONS_DIR = 'questions/';
+const DEFAULT_FILE = 'default';
+let data;
+let currentFile = DEFAULT_FILE;
+
+// --- text safety & inline formatting ---------------------------------------
+
+const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => HTML_ESCAPES[c]);
+}
+
+// Allowlisted inline tags, mapped to their pdfmake styling.
+const ALLOWED_TAGS = {
+  u: { decoration: 'underline' },
+  b: { bold: true }, strong: { bold: true },
+  i: { italics: true }, em: { italics: true },
+};
+const ALLOWED_RE = new RegExp('&lt;(/?(?:' + Object.keys(ALLOWED_TAGS).join('|') + '))&gt;', 'g');
+
+// Escape everything, then re-enable only the allowlisted inline tags.
+function formatInline(s) {
+  return escapeHtml(s).replace(ALLOWED_RE, '<$1>');
+}
+
+// Parse allowlisted inline tags into pdfmake text runs; other tags stay literal.
+function inlineToPdf(s) {
+  const str = String(s == null ? '' : s);
+  const re = /<(\/?)([a-zA-Z]+)>/g;
+  const runs = [], stack = [];
+  let last = 0, m;
+  const push = text => {
+    if (!text) return;
+    const run = { text };
+    for (const t of stack) Object.assign(run, ALLOWED_TAGS[t]);
+    runs.push(run);
+  };
+  while ((m = re.exec(str)) !== null) {
+    const tag = m[2].toLowerCase();
+    if (!ALLOWED_TAGS[tag]) continue;
+    push(str.slice(last, m.index));
+    last = m.index + m[0].length;
+    if (m[1]) { const i = stack.lastIndexOf(tag); if (i !== -1) stack.splice(i, 1); }
+    else stack.push(tag);
+  }
+  push(str.slice(last));
+  return runs.length ? runs : [{ text: str }];
+}
+
+function cssEscape(s) {
+  return (window.CSS && CSS.escape) ? CSS.escape(String(s)) : String(s).replace(/["\\\]]/g, '\\$&');
+}
+
+function storageKey() { return 'fragebogen_answers::' + currentFile; }
+
+function setError(msg) {
+  const el = document.getElementById('error');
+  el.textContent = msg || '';
+  el.hidden = !msg;
+}
+
+// --- loading & rendering ----------------------------------------------------
+
+async function init() {
+  try {
+    const res = await fetch(QUESTIONS_DIR + currentFile + '.yaml');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    data = jsyaml.load(await res.text());
+  } catch (e) {
+    setError('Fragebogen konnte nicht geladen werden (' + currentFile + '): ' + e.message);
+    return;
+  }
+  render();
+}
+
+function render() {
+  document.getElementById('title').textContent = data.title || currentFile;
+  const seen = new Set();
+  let html = '';
+  for (const section of data.sections || []) {
+    html += `<h2>${formatInline(section.title)}</h2>`;
+    if (section.description) html += `<p class="description">${formatInline(section.description)}</p>`;
+    for (const q of section.questions || []) {
+      if (seen.has(q.id)) console.warn('Doppelte Frage-ID:', q.id);
+      seen.add(q.id);
+      html += renderQuestion(q);
+    }
+  }
+  const form = document.getElementById('form');
+  form.innerHTML = html;
+  loadAnswers();
+  form.oninput = saveAnswers;
+  form.onclick = e => {
+    if (e.target.classList.contains('clear-choice')) {
+      e.preventDefault();
+      const checked = form.querySelector(`input[name="${cssEscape(e.target.dataset.for)}"]:checked`);
+      if (checked) { checked.checked = false; saveAnswers(); }
+    }
+  };
+}
+
+function renderQuestion(q) {
+  const id = escapeHtml(q.id);
+  let input;
+  if (q.type === 'textarea') {
+    input = `<textarea id="${id}"></textarea>`;
+  } else if (q.type === 'yesno') {
+    input = choiceGroup(q.id, ['Ja', 'Nein']);
+  } else if (q.type === 'choice') {
+    input = choiceGroup(q.id, q.options || []);
+  } else {
+    if (q.type !== 'text') console.warn('Unbekannter Fragetyp "' + q.type + '" für', q.id, '– verwende Textfeld.');
+    input = `<input type="text" id="${id}">`;
+  }
+  return `<div class="question"><label for="${id}">${formatInline(q.text)}</label>${input}</div>`;
+}
+
+function choiceGroup(name, options) {
+  const nameEsc = escapeHtml(name);
+  const opts = options.map(o =>
+    `<label><input type="radio" name="${nameEsc}" value="${escapeHtml(o)}"> ${escapeHtml(o)}</label>`
+  ).join('');
+  return `<div class="choice-group">${opts}</div>` +
+    `<button type="button" class="clear-choice" data-for="${nameEsc}">Auswahl löschen</button>`;
+}
+
+// --- answer persistence -----------------------------------------------------
+
+function saveAnswers() {
+  const answers = {};
+  for (const s of data.sections || []) for (const q of s.questions || []) {
+    if (q.type === 'choice' || q.type === 'yesno') {
+      const checked = document.querySelector(`input[name="${cssEscape(q.id)}"]:checked`);
+      answers[q.id] = checked ? checked.value : '';
+    } else {
+      const el = document.getElementById(q.id);
+      answers[q.id] = el ? el.value : '';
+    }
+  }
+  localStorage.setItem(storageKey(), JSON.stringify(answers));
+  const notice = document.getElementById('saved');
+  notice.style.opacity = 1;
+  setTimeout(() => notice.style.opacity = 0, 1500);
+}
+
+function loadAnswers() {
+  const answers = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+  for (const [id, val] of Object.entries(answers)) {
+    const el = document.getElementById(id);
+    if (el) { el.value = val; }
+    else if (val) {
+      const radio = document.querySelector(`input[name="${cssEscape(id)}"][value="${cssEscape(val)}"]`);
+      if (radio) radio.checked = true;
+    }
+  }
+}
+
+// --- PDF export -------------------------------------------------------------
+
+function exportPDF() {
+  if (!data || !data.sections) {
+    setError('Kein Fragebogen geladen – PDF-Export nicht möglich.');
+    return;
+  }
+  const answers = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+  const content = [{ text: inlineToPdf(data.title || currentFile), style: 'title' }];
+
+  function checkbox(checked) {
+    const box = {
+      canvas: [{ type: 'rect', x: 0, y: 0, w: 10, h: 10, lineWidth: 1, lineColor: '#333' }],
+      width: 14
+    };
+    if (checked) {
+      box.canvas.push({ type: 'line', x1: 2, y1: 5, x2: 4.5, y2: 8, lineWidth: 1.5, lineColor: '#333' });
+      box.canvas.push({ type: 'line', x1: 4.5, y1: 8, x2: 9, y2: 2, lineWidth: 1.5, lineColor: '#333' });
+    }
+    return box;
+  }
+
+  function optionRow(options, selected) {
+    const cols = [];
+    for (const o of options) {
+      cols.push(checkbox(o === selected));
+      cols.push({ text: inlineToPdf(o).concat({ text: '   ' }), style: 'answer', margin: [2, 0, 10, 0] });
+    }
+    return { columns: cols, margin: [10, 2, 0, 5] };
+  }
+
+  for (const section of data.sections) {
+    content.push({ text: inlineToPdf(section.title), style: 'h2', pageBreak: 'before' });
+    if (section.description) content.push({ text: inlineToPdf(section.description), style: 'desc' });
+    for (const q of section.questions || []) {
+      const block = [{ text: inlineToPdf(q.text), style: 'question' }];
+      if (q.type === 'yesno') block.push(optionRow(['Ja', 'Nein'], answers[q.id]));
+      else if (q.type === 'choice') block.push(optionRow(q.options || [], answers[q.id]));
+      else block.push({ text: answers[q.id] || '—', style: 'answer' });
+      content.push({ unbreakable: true, stack: block });
+    }
+  }
+  pdfMake.createPdf({
+    content,
+    styles: {
+      title: { fontSize: 18, bold: true, alignment: 'center', margin: [0, 0, 0, 20] },
+      h2: { fontSize: 14, bold: true, margin: [0, 20, 0, 5] },
+      desc: { fontSize: 10, italics: true, color: '#555', margin: [0, 0, 0, 10] },
+      question: { fontSize: 11, bold: true, margin: [0, 8, 0, 2] },
+      answer: { fontSize: 11, margin: [10, 0, 0, 5] }
+    }
+  }).download(currentFile + '.pdf');
+}
+
+init();
+</script>
+</body>
+</html>
